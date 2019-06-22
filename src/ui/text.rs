@@ -12,7 +12,7 @@ pub struct TextBox<C: CharacterCache> {
 }
 
 impl<C: CharacterCache> TextBox<C> {
-    const MARGIN: f64 = 2.0;
+    pub const MARGIN: f64 = 2.0;
 
     pub fn new(text: &str, width: f64, size: FontSize, glyph_cache: &mut C) -> Self {
         TextBox {
@@ -45,7 +45,7 @@ impl<C: CharacterCache> TextBox<C> {
             let t = c
                 .transform
                 .trans(x + Self::MARGIN * 2.0, y + line_h + Self::MARGIN * 1.5);
-            // unwrap isn't implemented for this! yay!
+            // TODO: Not this.
             match text(color::hex("ffffff"), self.size, line, glyph_cache, t, g) {
                 _ => {}
             }
@@ -55,14 +55,43 @@ impl<C: CharacterCache> TextBox<C> {
     pub fn height(&self) -> f64 {
         self.lines.len() as f64 * self.size as f64 + 5.0 * Self::MARGIN
     }
+
+    pub fn width(&self) -> f64 {
+        self.width
+    }
+
+    pub fn auto_width(&mut self, glyph_cache: &mut C) {
+        let mut final_width = 0.0;
+        for line in self.lines.iter() {
+            if let Ok(line_width) = glyph_cache.width(self.size, line) {
+                if line_width > final_width {
+                    final_width = line_width;
+                }
+            }
+        }
+        self.width = final_width + 4.0 * Self::MARGIN;
+    }
+
+    pub fn update_text(&mut self, new_text: &str, glyph_cache: &mut C) {
+        self.lines = get_lines(new_text, self.width, self.size, glyph_cache, Self::MARGIN);
+    }
+
+    pub fn update_text_one_line(&mut self, new_text: &str, glyph_cache: &mut C) {
+        self.lines = get_lines(new_text, 1000.0, self.size, glyph_cache, Self::MARGIN);
+        self.auto_width(glyph_cache);
+    }
 }
 
-fn get_lines<C: CharacterCache>(text: &str, width: f64, size: FontSize, glyph_cache: &mut C, margin: f64) -> Vec<String> {
+fn get_lines<C: CharacterCache>(
+    text: &str,
+    width: f64,
+    size: FontSize,
+    glyph_cache: &mut C,
+    margin: f64,
+) -> Vec<String> {
     let mut lines: Vec<String> = vec![];
     for line in text.lines() {
-        if let Ok(wrapped_lines) =
-            wrap(line, glyph_cache, size, width - 4.0 * margin)
-        {
+        if let Ok(wrapped_lines) = wrap(line, glyph_cache, size, width - 4.0 * margin) {
             for wrapped_line in wrapped_lines {
                 lines.push(wrapped_line);
             }

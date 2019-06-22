@@ -44,4 +44,8 @@ Work in progress.
 - [ ] Spawn actors based on some actual gameplay or simulation scenario instead
   of a bunch of test actors.
 - [ ] Add an actual GUI mod for all static textboxes.
-
+- [ ] Make sure that resizing is handled well (either don't allow it, or pass
+  updated height/width through to GUI)
+- [ ] Sometimes we get into Task::execute from Actor::render_all with an
+  index that is out of bounds??? I have no idea how this is possible. Added
+  debugging information in case this happens again.

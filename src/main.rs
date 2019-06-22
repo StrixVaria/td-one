@@ -42,7 +42,7 @@ struct Game<'a, C: CharacterCache> {
     selected_actor: Option<usize>,
     mouse: MouseDetails,
     offset: WorldOffset,
-    text_boxes: Vec<TextBox<C>>,
+    ui: GUI<C>,
     cache_type: PhantomData<*const C>,
     name_generator: Generator<'a>,
 }
@@ -57,7 +57,7 @@ impl<'a, C: CharacterCache> Game<'a, C> {
             selected_actor: None,
             mouse: MouseDetails::new(),
             offset: WorldOffset::new(),
-            text_boxes: vec![],
+            ui: GUI::new(WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT, font),
             cache_type: PhantomData,
             name_generator: Generator::default(),
         };
@@ -85,9 +85,7 @@ impl<'a, C: CharacterCache> Game<'a, C> {
             ActorBody::Building,
             ActorAi::Spawner { rate: 5.0 },
         );
-        // TODO: Remove adding a text box for no reason just to see it render.
-        game.text_boxes
-            .push(TextBox::new("This is a test sentence that has a lot of words in it. There are so many words that it's going to definitely take up at least like three lines, maybe more.\n\nAnd new paragraphs are supported, too!", 200.0, 12, font));
+
         game
     }
 
@@ -112,6 +110,7 @@ impl<'a, C: CharacterCache> Game<'a, C> {
         G: Graphics<Texture = <C as character::CharacterCache>::Texture>,
     {
         clear(color::hex("003333"), g);
+        self.update_ui(glyph_cache);
         let world_transform = c
             .transform
             .trans(self.offset.h, self.offset.v)
@@ -120,9 +119,6 @@ impl<'a, C: CharacterCache> Game<'a, C> {
         self.map.render(world_transform, g, mouse_x, mouse_y);
         for actor in self.actors.iter() {
             actor.render(world_transform, g);
-        }
-        for text_box in self.text_boxes.iter() {
-            text_box.render(15.0, 15.0, glyph_cache, c, g);
         }
         if let Some(actor_index) = self.selected_actor {
             let selected_box = TextBox::new(
@@ -133,6 +129,7 @@ impl<'a, C: CharacterCache> Game<'a, C> {
             );
             selected_box.render(self.mouse.x + 5.0, self.mouse.y + 5.0, glyph_cache, c, g);
         }
+        self.ui.render(glyph_cache, c, g);
     }
 
     pub fn mouse_at(&mut self, x: f64, y: f64) {
@@ -210,6 +207,10 @@ impl<'a, C: CharacterCache> Game<'a, C> {
 
     fn get_name(&mut self) -> Option<String> {
         self.name_generator.next()
+    }
+
+    fn update_ui(&mut self, glyph_cache: &mut C) {
+        self.ui.mouse_pos(self.mouse.x, self.mouse.y, glyph_cache);
     }
 }
 

@@ -19,7 +19,7 @@ pub struct UpdateResults {
     pub dead_actors: Vec<usize>,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct ActorRef {
     pub id: usize,
     region: Region,

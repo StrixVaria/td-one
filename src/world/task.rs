@@ -207,6 +207,16 @@ impl Task {
         actors: &mut Vec<Actor>,
         qt: &QuadTree<ActorRef>,
     ) -> TaskCompletion {
+        if i >= actors.len() {
+            println!("===================");
+            println!("ACTOR OUT OF BOUNDS");
+            println!("===================");
+            println!("i: {}", i);
+            println!("dt: {}", dt);
+            println!("actors: {:?}", actors);
+            println!("qt: {:?}", qt);
+            println!("===================");
+        }
         fix_target(i, actors);
         use TaskType::*;
         if let Some(ref task) = actors[i].task {
@@ -414,12 +424,7 @@ fn spawn_callback(
         if let Some(ref task) = actors[i].task {
             let (x, y) = actors[i].get_pos();
             if let Some((xo, yo, _, ai, body)) = task.params.spawn_params() {
-                return TaskCompletion::ai_choice().spawn(Actor::new(
-                    x + xo,
-                    y + yo,
-                    body,
-                    ai,
-                ));
+                return TaskCompletion::ai_choice().spawn(Actor::new(x + xo, y + yo, body, ai));
             }
         }
     }
