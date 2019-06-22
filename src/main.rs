@@ -23,8 +23,8 @@ mod world;
 use world::map::Map;
 use world::*;
 
-mod text;
-use text::*;
+mod ui;
+use ui::*;
 
 mod qt;
 use qt::*;
