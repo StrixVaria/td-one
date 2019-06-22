@@ -246,29 +246,31 @@ impl Task {
                     }
                 }
                 MoveToActor => {
-                    if let Some(ref target) = task.params.target {
-                        if let Some(index) = target.index {
-                            format!(
-                                "chasing {}",
-                                match &actors[index].name {
-                                    Some(name) => name,
-                                    _ => "",
-                                }
-                            )
-                        } else {
-                            "chasing".into()
-                        }
+                    if let Some(index) = task.get_target_index() {
+                        format!(
+                            "chasing {}",
+                            match &actors[index].name {
+                                Some(name) => name,
+                                _ => "",
+                            }
+                        )
                     } else {
                         "chasing".into()
                     }
                 }
-                RunFromActor => format!(
-                    "running from {}",
-                    "TODO" // match &actors[params.target.index].name {
-                           //     Some(name) => name,
-                           //     _ => "",
-                           // }
-                ),
+                RunFromActor => {
+                    if let Some(index) = task.get_target_index() {
+                        format!(
+                            "running from {}",
+                            match &actors[index].name {
+                                Some(name) => name,
+                                _ => "",
+                            }
+                        )
+                    } else {
+                        "running".into()
+                    }
+                }
                 Spawn => {
                     if let Some((_, _, delay, ai, _)) = task.params.spawn_params() {
                         format!("spawning a {} in {} seconds", ai, delay.floor())

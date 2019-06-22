@@ -33,10 +33,14 @@ impl<C: CharacterCache> GUI<C> {
     {
         let mouse_box_y = self.screen_height - Self::FONT_SIZE as f64 - 5.0 * TextBox::<C>::MARGIN;
         let mouse_box_x = self.screen_width - self.mouse_coords.width();
-        self.mouse_coords.render(mouse_box_x, mouse_box_y, glyph_cache, c, g);
+        self.mouse_coords
+            .render(mouse_box_x, mouse_box_y, glyph_cache, c, g);
     }
 
     pub fn mouse_pos(&mut self, x: f64, y: f64, glyph_cache: &mut C) {
-        self.mouse_coords.update_text_one_line(format!("({}, {})", x.floor(), y.floor()).as_str(), glyph_cache);
+        self.mouse_coords.update_text_one_line(
+            format!("({}, {})", x.floor(), y.floor()).as_str(),
+            glyph_cache,
+        );
     }
 }

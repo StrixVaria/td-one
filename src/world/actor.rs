@@ -39,14 +39,25 @@ impl Actor {
     pub fn render<G: Graphics>(&self, t: Matrix2d, g: &mut G) {
         self.body.render(self.x, self.y, t, g);
     }
-    
+
     pub fn render_extras<G: Graphics>(&self, actors: &Vec<Actor>, t: Matrix2d, g: &mut G) {
         if let Some(sight) = self.sight {
-            ellipse([1.0, 1.0, 1.0, 0.3], rectangle::centered_square(self.x, self.y, sight), t, g);
+            ellipse(
+                [1.0, 1.0, 1.0, 0.3],
+                rectangle::centered_square(self.x, self.y, sight),
+                t,
+                g,
+            );
         }
         if let Some(ref task) = self.task {
             if let Some(target) = task.get_target_index() {
-                line([0.8, 0.2, 0.2, 1.0], 1.0, [self.x, self.y, actors[target].x, actors[target].y], t, g);
+                line(
+                    [0.8, 0.2, 0.2, 1.0],
+                    1.0,
+                    [self.x, self.y, actors[target].x, actors[target].y],
+                    t,
+                    g,
+                );
             }
         }
     }
