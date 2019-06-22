@@ -40,10 +40,11 @@ Work in progress.
     find the right ID and then update the target index.
 - [x] Refactor TaskCompletion code to use builder pattern.
 - [ ] Lock selected actor on click.
-- [ ] Remove the test textbox.
+- [x] Remove the test textbox.
 - [ ] Spawn actors based on some actual gameplay or simulation scenario instead
   of a bunch of test actors.
-- [ ] Add an actual GUI mod for all static textboxes.
+- [x] Add an actual GUI mod for all static textboxes.
+  - [ ] Add more information to the GUI.
 - [ ] Make sure that resizing is handled well (either don't allow it, or pass
   updated height/width through to GUI)
 - [ ] Sometimes we get into Task::execute from Actor::render_all with an
@@ -51,3 +52,4 @@ Work in progress.
   debugging information in case this happens again.
 - [ ] Change square actors to have their x,y reference their center instead
   of their top-left, which should also fix sight radius thing.
+- [ ] Add combat.

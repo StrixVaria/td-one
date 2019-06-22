@@ -72,9 +72,9 @@ impl<C: CharacterCache> TextBox<C> {
         self.width = final_width + 4.0 * Self::MARGIN;
     }
 
-    pub fn update_text(&mut self, new_text: &str, glyph_cache: &mut C) {
-        self.lines = get_lines(new_text, self.width, self.size, glyph_cache, Self::MARGIN);
-    }
+    // pub fn update_text(&mut self, new_text: &str, glyph_cache: &mut C) {
+    //     self.lines = get_lines(new_text, self.width, self.size, glyph_cache, Self::MARGIN);
+    // }
 
     pub fn update_text_one_line(&mut self, new_text: &str, glyph_cache: &mut C) {
         self.lines = get_lines(new_text, 1000.0, self.size, glyph_cache, Self::MARGIN);
