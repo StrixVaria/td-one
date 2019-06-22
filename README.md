@@ -53,3 +53,5 @@ Work in progress.
 - [ ] Change square actors to have their x,y reference their center instead
   of their top-left, which should also fix sight radius thing.
 - [ ] Add combat.
+- [ ] Add animations.
+- [ ] Convert this TODO list to GitHub issues.
