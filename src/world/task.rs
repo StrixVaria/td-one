@@ -282,6 +282,15 @@ impl Task {
             Default::default()
         }
     }
+
+    pub fn get_target_index(&self) -> Option<usize> {
+        if let Some(ref target) = self.params.target {
+            if let Some(index) = target.index {
+                return Some(index);
+            }
+        }
+        None
+    }
 }
 
 /// Look backwards through the actors array starting at index `t - 1` for one

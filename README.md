@@ -49,3 +49,5 @@ Work in progress.
 - [ ] Sometimes we get into Task::execute from Actor::render_all with an
   index that is out of bounds??? I have no idea how this is possible. Added
   debugging information in case this happens again.
+- [ ] Change square actors to have their x,y reference their center instead
+  of their top-left, which should also fix sight radius thing.

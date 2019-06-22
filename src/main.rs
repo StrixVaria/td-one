@@ -39,7 +39,7 @@ use std::marker::PhantomData;
 struct Game<'a, C: CharacterCache> {
     map: Map,
     actors: Vec<Actor>,
-    selected_actor: Option<usize>,
+    hovered_actor: Option<usize>,
     mouse: MouseDetails,
     offset: WorldOffset,
     ui: GUI<C>,
@@ -54,7 +54,7 @@ impl<'a, C: CharacterCache> Game<'a, C> {
         let mut game = Self {
             map: Map::new(width, height),
             actors: vec![],
-            selected_actor: None,
+            hovered_actor: None,
             mouse: MouseDetails::new(),
             offset: WorldOffset::new(),
             ui: GUI::new(WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT, font),
@@ -102,7 +102,7 @@ impl<'a, C: CharacterCache> Game<'a, C> {
             actor.name = self.get_name();
             self.actors.push(actor);
         }
-        self.find_selected_actor(&qt);
+        self.find_hovered_actor(&qt);
     }
 
     pub fn render<G>(&mut self, glyph_cache: &mut C, c: Context, g: &mut G)
@@ -120,7 +120,8 @@ impl<'a, C: CharacterCache> Game<'a, C> {
         for actor in self.actors.iter() {
             actor.render(world_transform, g);
         }
-        if let Some(actor_index) = self.selected_actor {
+        if let Some(actor_index) = self.hovered_actor {
+            self.actors[actor_index].render_extras(&self.actors, world_transform, g);
             let selected_box = TextBox::new(
                 &format!("{}", Actor::description(actor_index, &self.actors)),
                 200.0,
@@ -156,7 +157,7 @@ impl<'a, C: CharacterCache> Game<'a, C> {
             println!("Clicked at ({}, {})", self.mouse.x, self.mouse.y);
             println!(
                 "There's {} there.",
-                match self.selected_actor {
+                match self.hovered_actor {
                     Some(_) => "something",
                     None => "nothing",
                 }
@@ -169,11 +170,11 @@ impl<'a, C: CharacterCache> Game<'a, C> {
         self.offset.zoom(up, self.mouse.x, self.mouse.y);
     }
 
-    fn find_selected_actor(&mut self, qt: &QuadTree<ActorRef>) {
+    fn find_hovered_actor(&mut self, qt: &QuadTree<ActorRef>) {
         let (mouse_x, mouse_y) = self.offset.to_local_pixel(self.mouse.x, self.mouse.y);
         let region = Region::new_point(mouse_x, mouse_y);
         let results = qt.query(&region);
-        self.selected_actor = if results.is_empty() {
+        self.hovered_actor = if results.is_empty() {
             None
         } else {
             results.first().map(|actor_ref| actor_ref.id)
