@@ -9,21 +9,26 @@ use std::marker::PhantomData;
 pub struct GUI<C: CharacterCache> {
     cache_type: PhantomData<*const C>,
     mouse_coords: TextBox<C>,
-    screen_width: f64,
-    screen_height: f64,
+    hovered_actor: TextBox<C>,
+    selected_actor: TextBox<C>,
+    // screen_width: f64,
+    // screen_height: f64,
 }
 
 impl<C: CharacterCache> GUI<C> {
     pub const FONT_SIZE: FontSize = 12;
 
     pub fn new(width: f64, height: f64, glyph_cache: &mut C) -> Self {
-        let mut mouse_box = TextBox::new("", 1000.0, Self::FONT_SIZE, glyph_cache);
-        mouse_box.auto_width(glyph_cache);
+        let mouse_box = TextBox::new("", 1000.0, Self::FONT_SIZE, width, 0.0, AnchorPoint::TopRight, glyph_cache);
+        let hovered_box = TextBox::new("", width / 2.0, Self::FONT_SIZE, width, height, AnchorPoint::BottomRight, glyph_cache);
+        let selected_box = TextBox::new("", width / 2.0, Self::FONT_SIZE, 0.0, height, AnchorPoint::BottomLeft, glyph_cache);
         Self {
             cache_type: PhantomData,
             mouse_coords: mouse_box,
-            screen_width: width,
-            screen_height: height,
+            hovered_actor: hovered_box,
+            selected_actor: selected_box,
+            // screen_width: width,
+            // screen_height: height,
         }
     }
 
@@ -31,10 +36,9 @@ impl<C: CharacterCache> GUI<C> {
     where
         G: Graphics<Texture = <C as character::CharacterCache>::Texture>,
     {
-        let mouse_box_y = self.screen_height - Self::FONT_SIZE as f64 - 5.0 * TextBox::<C>::MARGIN;
-        let mouse_box_x = self.screen_width - self.mouse_coords.width();
-        self.mouse_coords
-            .render(mouse_box_x, mouse_box_y, glyph_cache, c, g);
+        self.mouse_coords.render(glyph_cache, c, g);
+        self.hovered_actor.render(glyph_cache, c, g);
+        self.selected_actor.render(glyph_cache, c, g);
     }
 
     pub fn mouse_pos(&mut self, x: f64, y: f64, glyph_cache: &mut C) {
@@ -42,5 +46,15 @@ impl<C: CharacterCache> GUI<C> {
             format!("({}, {})", x.floor(), y.floor()).as_str(),
             glyph_cache,
         );
+    }
+
+    pub fn hovered_desc(&mut self, desc: &str, glyph_cache: &mut C) {
+        self.hovered_actor.update_text(desc, glyph_cache);
+        self.hovered_actor.realign();
+    }
+
+    pub fn selected_desc(&mut self, desc: &str, glyph_cache: &mut C) {
+        self.selected_actor.update_text(desc, glyph_cache);
+        self.selected_actor.realign();
     }
 }

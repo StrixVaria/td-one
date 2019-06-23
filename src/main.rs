@@ -40,6 +40,7 @@ struct Game<'a, C: CharacterCache> {
     map: Map,
     actors: Vec<Actor>,
     hovered_actor: Option<usize>,
+    selected_actor: Option<usize>,
     mouse: MouseDetails,
     offset: WorldOffset,
     ui: GUI<C>,
@@ -55,6 +56,7 @@ impl<'a, C: CharacterCache> Game<'a, C> {
             map: Map::new(width, height),
             actors: vec![],
             hovered_actor: None,
+            selected_actor: None,
             mouse: MouseDetails::new(),
             offset: WorldOffset::new(),
             ui: GUI::new(WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT, font),
@@ -89,7 +91,7 @@ impl<'a, C: CharacterCache> Game<'a, C> {
         game
     }
 
-    pub fn update(&mut self, args: &UpdateArgs) {
+    pub fn update(&mut self, args: &UpdateArgs, glyph_cache: &mut C) {
         let qt = self.build_quadtree();
         let mut results = Actor::update_all(args.dt, &mut self.actors, &qt);
         if !results.dead_actors.is_empty() {
@@ -102,7 +104,7 @@ impl<'a, C: CharacterCache> Game<'a, C> {
             actor.name = self.get_name();
             self.actors.push(actor);
         }
-        self.find_hovered_actor(&qt);
+        self.find_hovered_actor(&qt, glyph_cache);
     }
 
     pub fn render<G>(&mut self, glyph_cache: &mut C, c: Context, g: &mut G)
@@ -110,7 +112,6 @@ impl<'a, C: CharacterCache> Game<'a, C> {
         G: Graphics<Texture = <C as character::CharacterCache>::Texture>,
     {
         clear(color::hex("003333"), g);
-        self.update_ui(glyph_cache);
         let world_transform = c
             .transform
             .trans(self.offset.h, self.offset.v)
@@ -122,24 +123,21 @@ impl<'a, C: CharacterCache> Game<'a, C> {
         }
         if let Some(actor_index) = self.hovered_actor {
             self.actors[actor_index].render_extras(&self.actors, world_transform, g);
-            let selected_box = TextBox::new(
-                &format!("{}", Actor::description(actor_index, &self.actors)),
-                200.0,
-                14,
-                glyph_cache,
-            );
-            selected_box.render(self.mouse.x + 5.0, self.mouse.y + 5.0, glyph_cache, c, g);
+        }
+        if let Some(actor_index) = self.selected_actor {
+            self.actors[actor_index].render_extras(&self.actors, world_transform, g);
         }
         self.ui.render(glyph_cache, c, g);
     }
 
-    pub fn mouse_at(&mut self, x: f64, y: f64) {
+    pub fn mouse_at(&mut self, x: f64, y: f64, glyph_cache: &mut C) {
         // Piston gives us a single frame of 0.0, 0.0 when re-entering the
         // window that we have to ignore.
         if x.approx_eq(0.0, (0.0, 2)) && y.approx_eq(0.0, (0.0, 2)) {
             return;
         }
         self.mouse.set_pos(x, y);
+        self.ui.mouse_pos(x, y, glyph_cache);
         if self.mouse.pressed {
             let (dx, dy) = self.mouse.pos_diff();
             self.offset.slide(dx, dy);
@@ -151,17 +149,11 @@ impl<'a, C: CharacterCache> Game<'a, C> {
         self.mouse.pressed = true;
     }
 
-    pub fn mouse_up(&mut self) {
+    pub fn mouse_up(&mut self, glyph_cache: &mut C) {
         if self.mouse.barely_moved() {
             // TODO: Handle click event for real.
-            println!("Clicked at ({}, {})", self.mouse.x, self.mouse.y);
-            println!(
-                "There's {} there.",
-                match self.hovered_actor {
-                    Some(_) => "something",
-                    None => "nothing",
-                }
-            );
+            let qt = self.build_quadtree();
+            self.set_selected_actor(&qt, glyph_cache);
         }
         self.mouse.pressed = false;
     }
@@ -170,14 +162,34 @@ impl<'a, C: CharacterCache> Game<'a, C> {
         self.offset.zoom(up, self.mouse.x, self.mouse.y);
     }
 
-    fn find_hovered_actor(&mut self, qt: &QuadTree<ActorRef>) {
+    fn find_hovered_actor(&mut self, qt: &QuadTree<ActorRef>, glyph_cache: &mut C) {
         let (mouse_x, mouse_y) = self.offset.to_local_pixel(self.mouse.x, self.mouse.y);
         let region = Region::new_point(mouse_x, mouse_y);
         let results = qt.query(&region);
-        self.hovered_actor = if results.is_empty() {
-            None
+        if results.is_empty() {
+            // If we're not intersescting anything.
+            self.hovered_actor = None;
+            self.ui.hovered_desc("", glyph_cache);
         } else {
-            results.first().map(|actor_ref| actor_ref.id)
+            if let Some(new_hovered) = results.first().map(|actor_ref| actor_ref.id) {
+                self.hovered_actor = Some(new_hovered);
+                self.ui.hovered_desc(Actor::description(new_hovered, &self.actors).as_str(), glyph_cache);
+            }
+        }
+    }
+
+    fn set_selected_actor(&mut self, qt: &QuadTree<ActorRef>, glyph_cache: &mut C) {
+        let (mouse_x, mouse_y) = self.offset.to_local_pixel(self.mouse.x, self.mouse.y);
+        let region = Region::new_point(mouse_x, mouse_y);
+        let results = qt.query(&region);
+        if results.is_empty() {
+            self.selected_actor = None;
+            self.ui.selected_desc("", glyph_cache);
+        } else {
+            if let Some(new_selected) = results.first().map(|actor_ref| actor_ref.id) {
+                self.selected_actor = Some(new_selected);
+                self.ui.selected_desc(Actor::description(new_selected, &self.actors).as_str(), glyph_cache);
+            }
         }
     }
 
@@ -208,10 +220,6 @@ impl<'a, C: CharacterCache> Game<'a, C> {
 
     fn get_name(&mut self) -> Option<String> {
         self.name_generator.next()
-    }
-
-    fn update_ui(&mut self, glyph_cache: &mut C) {
-        self.ui.mouse_pos(self.mouse.x, self.mouse.y, glyph_cache);
     }
 }
 
@@ -342,7 +350,7 @@ fn main() {
 
     while let Some(e) = events.next(window) {
         e.update(|args| {
-            game.update(args);
+            game.update(args, &mut glyph_cache);
         });
 
         e.render(|args| {
@@ -356,7 +364,7 @@ fn main() {
         });
 
         e.mouse_cursor(|args| {
-            game.mouse_at(args[0], args[1]);
+            game.mouse_at(args[0], args[1], &mut glyph_cache);
         });
 
         e.press(|args| match args {
@@ -368,7 +376,7 @@ fn main() {
 
         e.release(|args| match args {
             Button::Mouse(MouseButton::Left) => {
-                game.mouse_up();
+                game.mouse_up(&mut glyph_cache);
             }
             _ => {}
         });

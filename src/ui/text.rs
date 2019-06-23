@@ -4,36 +4,57 @@ use graphics::*;
 
 use std::marker::PhantomData;
 
+#[derive(Clone, Copy)]
+pub enum AnchorPoint {
+    // TopLeft,
+    TopRight,
+    BottomLeft,
+    BottomRight,
+    // Center,
+}
+
 pub struct TextBox<C: CharacterCache> {
     lines: Vec<String>,
     width: f64,
     size: FontSize,
     cache_type: PhantomData<*const C>,
+    abs_x: f64,
+    abs_y: f64,
+    x: f64,
+    y: f64,
+    anchor: AnchorPoint,
 }
 
 impl<C: CharacterCache> TextBox<C> {
     pub const MARGIN: f64 = 2.0;
 
-    pub fn new(text: &str, width: f64, size: FontSize, glyph_cache: &mut C) -> Self {
-        TextBox {
+    pub fn new(text: &str, width: f64, size: FontSize, x: f64, y: f64, anchor: AnchorPoint, glyph_cache: &mut C) -> Self {
+        let mut text_box = TextBox {
             lines: get_lines(text, width, size, glyph_cache, Self::MARGIN),
             width,
             size,
             cache_type: PhantomData,
-        }
+            x,
+            y,
+            anchor,
+            abs_x: 0.0,
+            abs_y: 0.0,
+        };
+        text_box.realign();
+        text_box
     }
 
-    pub fn render<G>(&self, x: f64, y: f64, glyph_cache: &mut C, c: Context, g: &mut G)
+    pub fn render<G>(&self, glyph_cache: &mut C, c: Context, g: &mut G)
     where
         G: Graphics<Texture = <C as character::CharacterCache>::Texture>,
     {
         let h = self.height();
-        rectangle(color::hex("ffffff"), [x, y, self.width, h], c.transform, g);
+        rectangle(color::hex("ffffff"), [self.abs_x, self.abs_y, self.width, h], c.transform, g);
         rectangle(
             color::hex("003333"),
             [
-                x + Self::MARGIN,
-                y + Self::MARGIN,
+                self.abs_x + Self::MARGIN,
+                self.abs_y + Self::MARGIN,
                 self.width - 2.0 * Self::MARGIN,
                 h - 2.0 * Self::MARGIN,
             ],
@@ -44,7 +65,7 @@ impl<C: CharacterCache> TextBox<C> {
             let line_h = self.size as f64 * (i + 1) as f64;
             let t = c
                 .transform
-                .trans(x + Self::MARGIN * 2.0, y + line_h + Self::MARGIN * 1.5);
+                .trans(self.abs_x + Self::MARGIN * 2.0, self.abs_y + line_h + Self::MARGIN * 1.5);
             // TODO: Not this.
             match text(color::hex("ffffff"), self.size, line, glyph_cache, t, g) {
                 _ => {}
@@ -56,9 +77,9 @@ impl<C: CharacterCache> TextBox<C> {
         self.lines.len() as f64 * self.size as f64 + 5.0 * Self::MARGIN
     }
 
-    pub fn width(&self) -> f64 {
-        self.width
-    }
+    // pub fn width(&self) -> f64 {
+    //     self.width
+    // }
 
     pub fn auto_width(&mut self, glyph_cache: &mut C) {
         let mut final_width = 0.0;
@@ -70,15 +91,35 @@ impl<C: CharacterCache> TextBox<C> {
             }
         }
         self.width = final_width + 4.0 * Self::MARGIN;
+        self.realign();
     }
 
-    // pub fn update_text(&mut self, new_text: &str, glyph_cache: &mut C) {
-    //     self.lines = get_lines(new_text, self.width, self.size, glyph_cache, Self::MARGIN);
-    // }
+    pub fn update_text(&mut self, new_text: &str, glyph_cache: &mut C) {
+        self.lines = get_lines(new_text, self.width, self.size, glyph_cache, Self::MARGIN);
+    }
 
     pub fn update_text_one_line(&mut self, new_text: &str, glyph_cache: &mut C) {
-        self.lines = get_lines(new_text, 1000.0, self.size, glyph_cache, Self::MARGIN);
+        self.lines = vec![new_text.into()];
         self.auto_width(glyph_cache);
+    }
+
+    // pub fn reposition(&mut self, x: f64, y: f64, anchor: AnchorPoint) {
+    //     self.x = x;
+    //     self.y = y;
+    //     self.anchor = anchor;
+    //     self.realign();
+    // }
+
+    pub fn realign(&mut self) {
+        use AnchorPoint::*;
+        let (x, y) = match self.anchor {
+            // TopLeft => (self.x, self.y),
+            TopRight => (self.x - self.width, self.y),
+            BottomLeft => (self.x, self.y - self.height()),
+            BottomRight => (self.x - self.width, self.y - self.height()),
+        };
+        self.abs_x = x;
+        self.abs_y = y;
     }
 }
 

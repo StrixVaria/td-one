@@ -55,3 +55,5 @@ Work in progress.
 - [ ] Add combat.
 - [ ] Add animations.
 - [ ] Convert this TODO list to GitHub issues.
+- [ ] Add a way to make text boxes keep a static height.
+- [ ] Fix selected/hovered actor index when things die.
