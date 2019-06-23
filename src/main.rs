@@ -93,8 +93,20 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
         let mut results = Actor::update_all(args.dt, &mut self.actors, &qt);
         if !results.dead_actors.is_empty() {
             results.dead_actors.sort();
-            for dead_actor in results.dead_actors.iter().rev() {
-                self.actors.remove(*dead_actor);
+            for dead_actor_index in results.dead_actors.into_iter().rev() {
+                if let Some(selected_actor_index) = self.selected_actor {
+                    if selected_actor_index == dead_actor_index {
+                        // If the selected actor is dead, just remove the
+                        // reference.
+                        self.selected_actor = None;
+                        self.ui.selected_desc("");
+                    } else if selected_actor_index > dead_actor_index {
+                        // Every time we delete something earlier in the array,
+                        // move our reference back one.
+                        self.selected_actor = Some(selected_actor_index - 1);
+                    }
+                }
+                self.actors.remove(dead_actor_index);
             }
         }
         for mut actor in results.new_actors.drain(..) {

@@ -39,12 +39,12 @@ Work in progress.
     don't find your target at the given ID, you can step backwards until you
     find the right ID and then update the target index.
 - [x] Refactor TaskCompletion code to use builder pattern.
-- [ ] Lock selected actor on click.
+- [x] Lock selected actor on click.
 - [x] Remove the test textbox.
 - [ ] Spawn actors based on some actual gameplay or simulation scenario instead
   of a bunch of test actors.
 - [x] Add an actual GUI mod for all static textboxes.
-  - [ ] Add more information to the GUI.
+  - [x] Add more information to the GUI.
 - [ ] Make sure that resizing is handled well (either don't allow it, or pass
   updated height/width through to GUI)
 - [ ] Sometimes we get into Task::execute from Actor::render_all with an
@@ -56,4 +56,4 @@ Work in progress.
 - [ ] Add animations.
 - [ ] Convert this TODO list to GitHub issues.
 - [ ] Add a way to make text boxes keep a static height.
-- [ ] Fix selected/hovered actor index when things die.
+- [x] Fix selected/hovered actor index when things die.
