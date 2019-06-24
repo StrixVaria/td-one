@@ -310,11 +310,11 @@ fn fix_target(index: usize, actors: &mut Vec<Actor>) {
                         new_index = Some(index);
                         break;
                     }
-                    index -= 1;
                     if index == 0 {
                         new_index = None;
                         break;
                     }
+                    index -= 1;
                 }
             }
         }
