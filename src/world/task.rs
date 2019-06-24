@@ -1,6 +1,7 @@
 use std::time::Instant;
 
 use crate::world::*;
+use map::WorldBounds;
 
 #[derive(Debug, Clone)]
 pub struct Target {
@@ -206,6 +207,7 @@ impl Task {
         dt: f64,
         actors: &mut Vec<Actor>,
         qt: &QuadTree<ActorRef>,
+        bounds: &WorldBounds,
     ) -> TaskCompletion {
         if i >= actors.len() {
             println!("===================");
@@ -222,11 +224,11 @@ impl Task {
         if let Some(ref task) = actors[i].task {
             match task.tag {
                 Idle => TaskCompletion::ai_choice(),
-                MoveTo => move_to_callback(i, dt, actors, qt),
-                MoveToActor => move_to_actor_callback(i, dt, actors, qt),
-                RunFromActor => run_from_actor_callback(i, dt, actors, qt),
-                Spawn => spawn_callback(i, dt, actors, qt),
-                Explode => explode_callback(i, dt, actors, qt),
+                MoveTo => move_to_callback(i, dt, actors, qt, bounds),
+                MoveToActor => move_to_actor_callback(i, dt, actors, qt, bounds),
+                RunFromActor => run_from_actor_callback(i, dt, actors, qt, bounds),
+                Spawn => spawn_callback(i, dt, actors, qt, bounds),
+                Explode => explode_callback(i, dt, actors, qt, bounds),
             }
         } else {
             TaskCompletion::ai_choice()
@@ -303,7 +305,7 @@ fn fix_target(index: usize, actors: &mut Vec<Actor>) {
         if let Some(ref target) = task.params.target {
             if let Some(mut index) = target.index {
                 if index >= actors.len() {
-                    index = actors.len();
+                    index = actors.len() - 1;
                 }
                 loop {
                     if actors[index].id == target.id {
@@ -333,16 +335,17 @@ fn move_to_callback(
     dt: f64,
     actors: &mut Vec<Actor>,
     qt: &QuadTree<ActorRef>,
+    bounds: &WorldBounds,
 ) -> TaskCompletion {
-    let collided: Vec<ActorRef> = qt
-        .query(&actors[i].get_region())
-        .into_iter()
-        .filter(|a| a.id != i)
-        .collect();
     if let Some(ref task) = actors[i].task {
+        let collided: Vec<ActorRef> = qt
+            .query(&actors[i].get_region())
+            .into_iter()
+            .filter(|a| a.id != i)
+            .collect();
         TaskCompletion::new(if collided.len() == 0 {
             if let Some((x, y)) = task.params.xy_params() {
-                if actors[i].step_towards(x, y, dt) {
+                if actors[i].step_towards(x, y, dt, bounds) {
                     NextAction::AiChoice
                 } else {
                     NextAction::Continue
@@ -366,6 +369,7 @@ fn move_to_actor_callback(
     dt: f64,
     actors: &mut Vec<Actor>,
     _qt: &QuadTree<ActorRef>,
+    bounds: &WorldBounds,
 ) -> TaskCompletion {
     let mut target_position: Option<(f64, f64)> = None;
     let mut max_distance: Option<f64> = None;
@@ -380,9 +384,9 @@ fn move_to_actor_callback(
         max_distance = task.params.custom;
     }
     if let Some((x, y)) = target_position {
-        actors[i].step_towards(x, y, dt);
+        let arrived = actors[i].step_towards(x, y, dt, bounds);
         return TaskCompletion::new(
-            if vector::distance_cmp(actors[i].x, actors[i].y, x, y, max_distance.unwrap_or(0.0)) {
+            if arrived || vector::distance_cmp(actors[i].x, actors[i].y, x, y, max_distance.unwrap_or(0.0)) {
                 NextAction::AiChoice
             } else {
                 NextAction::Continue
@@ -398,13 +402,14 @@ fn run_from_actor_callback(
     dt: f64,
     actors: &mut Vec<Actor>,
     _qt: &QuadTree<ActorRef>,
+    bounds: &WorldBounds,
 ) -> TaskCompletion {
     if let Some(ref task) = actors[i].task {
         if let Some(ref target) = task.params.target {
             if let Some(index) = target.index {
                 let (x, y) = actors[index].get_pos();
-                actors[i].step_from(x, y, dt);
-                return TaskCompletion::new(if actors[i].can_see(x, y) {
+                let done = actors[i].step_from(x, y, dt, bounds);
+                return TaskCompletion::new(if !done && actors[i].can_see(x, y) {
                     NextAction::Continue
                 } else {
                     NextAction::AiChoice
@@ -421,6 +426,7 @@ fn spawn_callback(
     dt: f64,
     actors: &mut Vec<Actor>,
     _qt: &QuadTree<ActorRef>,
+    _bounds: &WorldBounds,
 ) -> TaskCompletion {
     let mut should_spawn = false;
     if let Some(ref mut task) = actors[i].task {
@@ -447,6 +453,7 @@ fn explode_callback(
     _dt: f64,
     actors: &mut Vec<Actor>,
     qt: &QuadTree<ActorRef>,
+    _bounds: &WorldBounds,
 ) -> TaskCompletion {
     let targets = qt.query(&Region::new_circle(actors[i].x, actors[i].y, 25.0));
     let mut ret = TaskCompletion::ai_choice();

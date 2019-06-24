@@ -3,6 +3,7 @@ use graphics::*;
 use std::time::Instant;
 
 use crate::world::*;
+use map::WorldBounds;
 
 #[derive(Debug)]
 pub struct Actor {
@@ -62,11 +63,11 @@ impl Actor {
         }
     }
 
-    pub fn update_all(dt: f64, actors: &mut Vec<Actor>, qt: &QuadTree<ActorRef>) -> UpdateResults {
+    pub fn update_all(dt: f64, actors: &mut Vec<Actor>, qt: &QuadTree<ActorRef>, bounds: &WorldBounds) -> UpdateResults {
         let mut new_actors = vec![];
         let mut dead_actors = vec![];
         for i in 0..actors.len() {
-            let task_completion = Task::execute(i, dt, actors, qt);
+            let task_completion = Task::execute(i, dt, actors, qt, bounds);
             if let Some(actor) = task_completion.new_actor {
                 new_actors.push(actor);
             }
@@ -120,28 +121,44 @@ impl Actor {
         }
     }
 
-    /// Returns whether or not it arrived. Always returns false if this actor
-    /// can't move.
-    pub fn step_towards(&mut self, x: f64, y: f64, dt: f64) -> bool {
+    /// Returns true if the actor should no longer move, either because it
+    /// arrived at its destination or hit a grid boundary. Always returns false
+    /// if this actor can't move.
+    pub fn step_towards(&mut self, x: f64, y: f64, dt: f64, bounds: &WorldBounds) -> bool {
+        let mut arrived = false;
         match self.speed {
             Some(speed) => {
                 let speed = speed * dt;
                 if vector::distance_cmp(self.x, self.y, x, y, speed) {
                     self.x = x;
                     self.y = y;
-                    true
+                    arrived = true;
                 } else {
                     self.step_in_dir(self.x, self.y, x, y, dt);
-                    false
                 }
             }
-            None => false,
+            _ => (),
         }
+        self.constrain_location(bounds) || arrived
     }
 
     /// Take a step in the direction directly away from (x,y)
-    pub fn step_from(&mut self, x: f64, y: f64, dt: f64) {
+    pub fn step_from(&mut self, x: f64, y: f64, dt: f64, bounds: &WorldBounds) -> bool {
         self.step_in_dir(x, y, self.x, self.y, dt);
+        self.constrain_location(bounds)
+    }
+
+    /// Constrain the current (x,y) position to be within the given bounds.
+    /// Returns whether or not the current position was affected.
+    pub fn constrain_location(&mut self, bounds: &WorldBounds) -> bool {
+        let (x, y) = bounds.constrain(self.x, self.y);
+        if self.x != x || self.y != y {
+            self.x = x;
+            self.y = y;
+            true
+        } else {
+            false
+        }
     }
 
     pub fn description(i: usize, actors: &Vec<Actor>) -> String {
@@ -161,6 +178,7 @@ impl Actor {
 
     /// Step this actor's speed in direction from (x1,y1) to (x2,y2). Does
     /// nothing if actor can't move.
+    /// DOES NOT constraint motion to within bounds.
     fn step_in_dir(&mut self, x1: f64, y1: f64, x2: f64, y2: f64, dt: f64) {
         if let Some(speed) = self.speed {
             let (dx, dy) = vector::direction(x1, y1, x2, y2);

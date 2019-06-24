@@ -91,7 +91,7 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
 
     pub fn update(&mut self, args: &UpdateArgs) {
         let qt = self.build_quadtree();
-        let mut results = Actor::update_all(args.dt, &mut self.actors, &qt);
+        let mut results = Actor::update_all(args.dt, &mut self.actors, &qt, &self.map.get_bounds());
         if !results.dead_actors.is_empty() {
             results.dead_actors.sort();
             for dead_actor_index in results.dead_actors.into_iter().rev() {
