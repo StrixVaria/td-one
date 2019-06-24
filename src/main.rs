@@ -67,7 +67,8 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
             WINDOW_DEFAULT_HEIGHT,
         );
         // TODO: Currently just adds 10 generic actors. Long-term remove this.
-        let (x_dim, y_dim) = game.map.get_dimensions();
+        let bounds = game.map.get_bounds();
+        let (x_dim, y_dim) = (bounds.w, bounds.h);
         for _ in 0..10 {
             let x: f64 = rand::thread_rng().gen();
             let y: f64 = rand::thread_rng().gen();
@@ -198,8 +199,8 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
     }
 
     fn build_quadtree(&self) -> QuadTree<ActorRef> {
-        let (w, h) = self.map.get_dimensions();
-        let mut qt: QuadTree<ActorRef> = QuadTree::new(RectangleData::new(0.0, 0.0, w, h));
+        let bounds = self.map.get_bounds();
+        let mut qt: QuadTree<ActorRef> = QuadTree::new(RectangleData::new(bounds.x, bounds.y, bounds.w, bounds.h));
         for (i, actor) in self.actors.iter().enumerate() {
             qt.insert(actor.get_ref(i));
         }

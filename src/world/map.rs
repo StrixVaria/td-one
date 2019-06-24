@@ -15,6 +15,37 @@ pub enum Tile {
     Building,
 }
 
+pub struct WorldBounds {
+    pub x: f64,
+    pub y: f64,
+    pub w: f64,
+    pub h: f64,
+}
+
+impl WorldBounds {
+    fn new(x: f64, y: f64, w: f64, h: f64) -> Self {
+        Self { x, y, w, h }
+    }
+
+    pub fn in_bounds(&self, x: f64, y: f64) -> bool {
+        x >= self.x && x <= self.x + self.w && y >= self.y && y <= self.y + self.h
+    }
+
+    pub fn constrain(&self, mut x: f64, mut y: f64) -> (f64, f64) {
+        if x < self.x {
+            x = self.x;
+        } else if x > self.x + self.w {
+            x = self.x + self.w;
+        }
+        if y < self.y {
+            y = self.y;
+        } else if y >= self.y + self.h {
+            y = self.y + self.h;
+        }
+        (x, y)
+    }
+}
+
 pub struct Map {
     grid: Vec<Tile>,
     width: usize,
@@ -88,8 +119,8 @@ impl Map {
     }
 
     fn get_cell_for_pixel(&self, x: f64, y: f64) -> Option<(usize, usize)> {
-        let (max_x, max_y) = self.get_dimensions();
-        if x < 0.0 || y < 0.0 || x > max_x || y > max_y {
+        let bounds = self.get_bounds();
+        if !bounds.in_bounds(x, y) {
             None
         } else {
             Some((
@@ -103,10 +134,7 @@ impl Map {
         (x as f64 * GRID_TILE_SIZE, y as f64 * GRID_TILE_SIZE)
     }
 
-    pub fn get_dimensions(&self) -> (f64, f64) {
-        (
-            self.width as f64 * GRID_TILE_SIZE,
-            self.height as f64 * GRID_TILE_SIZE,
-        )
+    pub fn get_bounds(&self) -> WorldBounds {
+        WorldBounds::new(0.0, 0.0, self.width as f64 * GRID_TILE_SIZE, self.height as f64 * GRID_TILE_SIZE)
     }
 }
