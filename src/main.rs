@@ -171,6 +171,10 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
         self.offset.zoom(up, self.mouse.x, self.mouse.y);
     }
 
+    pub fn resize(&mut self, w: f64, h: f64) {
+        self.ui.resize(w, h);
+    }
+
     fn find_hovered_actor(&mut self, qt: &QuadTree<ActorRef>) {
         let (mouse_x, mouse_y) = self.offset.to_local_pixel(self.mouse.x, self.mouse.y);
         let region = Region::new_point(mouse_x, mouse_y);
@@ -398,6 +402,10 @@ fn main() {
                 game.mouse_up();
             }
             _ => {}
+        });
+
+        e.resize(|args| {
+            game.resize(args.window_size[0], args.window_size[1]);
         });
     }
 }

@@ -94,6 +94,11 @@ impl<C: CharacterCache> TextBox<C> {
         self.realign();
     }
 
+    pub fn set_width(&mut self, width: f64, glyph_cache: &mut C) {
+        self.lines = get_lines(self.lines.join("\n").as_str(), width, self.size, glyph_cache, Self::MARGIN);
+        self.width = width;
+    }
+
     pub fn update_text(&mut self, new_text: &str, glyph_cache: &mut C) {
         self.lines = get_lines(new_text, self.width, self.size, glyph_cache, Self::MARGIN);
     }
@@ -103,12 +108,12 @@ impl<C: CharacterCache> TextBox<C> {
         self.auto_width(glyph_cache);
     }
 
-    // pub fn reposition(&mut self, x: f64, y: f64, anchor: AnchorPoint) {
-    //     self.x = x;
-    //     self.y = y;
-    //     self.anchor = anchor;
-    //     self.realign();
-    // }
+    pub fn reposition(&mut self, x: f64, y: f64, anchor: AnchorPoint) {
+        self.x = x;
+        self.y = y;
+        self.anchor = anchor;
+        self.realign();
+    }
 
     pub fn realign(&mut self) {
         use AnchorPoint::*;

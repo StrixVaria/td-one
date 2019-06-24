@@ -40,6 +40,14 @@ impl<'a, C: CharacterCache> GUI<'a, C> {
         self.selected_actor.render(&mut self.glyph_cache, c, g);
     }
 
+    pub fn resize(&mut self, w: f64, h: f64) {
+        self.mouse_coords.reposition(w, 0.0, AnchorPoint::TopRight);
+        self.hovered_actor.reposition(w, h, AnchorPoint::BottomRight);
+        self.hovered_actor.set_width(w / 2.0, self.glyph_cache);
+        self.selected_actor.reposition(0.0, h, AnchorPoint::BottomLeft);
+        self.selected_actor.set_width(w / 2.0, self.glyph_cache);
+    }
+
     pub fn mouse_pos(&mut self, x: f64, y: f64) {
         self.mouse_coords.update_text_one_line(
             format!("({}, {})", x.floor(), y.floor()).as_str(),
