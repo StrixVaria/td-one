@@ -99,7 +99,6 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
                         // If the selected actor is dead, just remove the
                         // reference.
                         self.selected_actor = None;
-                        self.ui.selected_desc("");
                     } else if selected_actor_index > dead_actor_index {
                         // Every time we delete something earlier in the array,
                         // move our reference back one.
@@ -114,6 +113,7 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
             self.actors.push(actor);
         }
         self.find_hovered_actor(&qt);
+        self.update_ui();
     }
 
     pub fn render<G>(&mut self, c: Context, g: &mut G)
@@ -146,7 +146,6 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
             return;
         }
         self.mouse.set_pos(x, y);
-        self.ui.mouse_pos(x, y);
         if self.mouse.pressed {
             let (dx, dy) = self.mouse.pos_diff();
             self.offset.slide(dx, dy);
@@ -178,11 +177,9 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
         if results.is_empty() {
             // If we're not intersescting anything.
             self.hovered_actor = None;
-            self.ui.hovered_desc("");
         } else {
             if let Some(new_hovered) = results.first().map(|actor_ref| actor_ref.id) {
                 self.hovered_actor = Some(new_hovered);
-                self.ui.hovered_desc(Actor::description(new_hovered, &self.actors).as_str());
             }
         }
     }
@@ -193,11 +190,9 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
         let results = qt.query(&region);
         if results.is_empty() {
             self.selected_actor = None;
-            self.ui.selected_desc("");
         } else {
             if let Some(new_selected) = results.first().map(|actor_ref| actor_ref.id) {
                 self.selected_actor = Some(new_selected);
-                self.ui.selected_desc(Actor::description(new_selected, &self.actors).as_str());
             }
         }
     }
@@ -229,6 +224,20 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
 
     fn get_name(&mut self) -> Option<String> {
         self.name_generator.next()
+    }
+
+    fn update_ui(&mut self) {
+        if let Some(selected) = self.selected_actor {
+            self.ui.selected_desc(Actor::description(selected, &self.actors).as_str());
+        } else {
+            self.ui.selected_desc("");
+        }
+        if let Some(hovered) = self.hovered_actor {
+            self.ui.hovered_desc(Actor::description(hovered, &self.actors).as_str());
+        } else {
+            self.ui.hovered_desc("");
+        }
+        self.ui.mouse_pos(self.mouse.x, self.mouse.y);
     }
 }
 
