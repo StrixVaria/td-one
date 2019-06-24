@@ -63,7 +63,12 @@ impl Actor {
         }
     }
 
-    pub fn update_all(dt: f64, actors: &mut Vec<Actor>, qt: &QuadTree<ActorRef>, bounds: &WorldBounds) -> UpdateResults {
+    pub fn update_all(
+        dt: f64,
+        actors: &mut Vec<Actor>,
+        qt: &QuadTree<ActorRef>,
+        bounds: &WorldBounds,
+    ) -> UpdateResults {
         let mut new_actors = vec![];
         let mut dead_actors = vec![];
         for i in 0..actors.len() {

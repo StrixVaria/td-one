@@ -28,7 +28,15 @@ pub struct TextBox<C: CharacterCache> {
 impl<C: CharacterCache> TextBox<C> {
     pub const MARGIN: f64 = 2.0;
 
-    pub fn new(text: &str, width: f64, size: FontSize, x: f64, y: f64, anchor: AnchorPoint, glyph_cache: &mut C) -> Self {
+    pub fn new(
+        text: &str,
+        width: f64,
+        size: FontSize,
+        x: f64,
+        y: f64,
+        anchor: AnchorPoint,
+        glyph_cache: &mut C,
+    ) -> Self {
         let mut text_box = TextBox {
             lines: get_lines(text, width, size, glyph_cache, Self::MARGIN),
             width,
@@ -49,7 +57,12 @@ impl<C: CharacterCache> TextBox<C> {
         G: Graphics<Texture = <C as character::CharacterCache>::Texture>,
     {
         let h = self.height();
-        rectangle(color::hex("ffffff"), [self.abs_x, self.abs_y, self.width, h], c.transform, g);
+        rectangle(
+            color::hex("ffffff"),
+            [self.abs_x, self.abs_y, self.width, h],
+            c.transform,
+            g,
+        );
         rectangle(
             color::hex("003333"),
             [
@@ -63,9 +76,10 @@ impl<C: CharacterCache> TextBox<C> {
         );
         for (i, line) in self.lines.iter().enumerate() {
             let line_h = self.size as f64 * (i + 1) as f64;
-            let t = c
-                .transform
-                .trans(self.abs_x + Self::MARGIN * 2.0, self.abs_y + line_h + Self::MARGIN * 1.5);
+            let t = c.transform.trans(
+                self.abs_x + Self::MARGIN * 2.0,
+                self.abs_y + line_h + Self::MARGIN * 1.5,
+            );
             // TODO: Not this.
             match text(color::hex("ffffff"), self.size, line, glyph_cache, t, g) {
                 _ => {}
@@ -95,7 +109,13 @@ impl<C: CharacterCache> TextBox<C> {
     }
 
     pub fn set_width(&mut self, width: f64, glyph_cache: &mut C) {
-        self.lines = get_lines(self.lines.join("\n").as_str(), width, self.size, glyph_cache, Self::MARGIN);
+        self.lines = get_lines(
+            self.lines.join("\n").as_str(),
+            width,
+            self.size,
+            glyph_cache,
+            Self::MARGIN,
+        );
         self.width = width;
     }
 

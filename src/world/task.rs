@@ -386,7 +386,9 @@ fn move_to_actor_callback(
     if let Some((x, y)) = target_position {
         let arrived = actors[i].step_towards(x, y, dt, bounds);
         return TaskCompletion::new(
-            if arrived || vector::distance_cmp(actors[i].x, actors[i].y, x, y, max_distance.unwrap_or(0.0)) {
+            if arrived
+                || vector::distance_cmp(actors[i].x, actors[i].y, x, y, max_distance.unwrap_or(0.0))
+            {
                 NextAction::AiChoice
             } else {
                 NextAction::Continue

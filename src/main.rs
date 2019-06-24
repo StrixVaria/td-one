@@ -204,7 +204,8 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
 
     fn build_quadtree(&self) -> QuadTree<ActorRef> {
         let bounds = self.map.get_bounds();
-        let mut qt: QuadTree<ActorRef> = QuadTree::new(RectangleData::new(bounds.x, bounds.y, bounds.w, bounds.h));
+        let mut qt: QuadTree<ActorRef> =
+            QuadTree::new(RectangleData::new(bounds.x, bounds.y, bounds.w, bounds.h));
         for (i, actor) in self.actors.iter().enumerate() {
             qt.insert(actor.get_ref(i));
         }
@@ -233,12 +234,14 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
 
     fn update_ui(&mut self) {
         if let Some(selected) = self.selected_actor {
-            self.ui.selected_desc(Actor::description(selected, &self.actors).as_str());
+            self.ui
+                .selected_desc(Actor::description(selected, &self.actors).as_str());
         } else {
             self.ui.selected_desc("");
         }
         if let Some(hovered) = self.hovered_actor {
-            self.ui.hovered_desc(Actor::description(hovered, &self.actors).as_str());
+            self.ui
+                .hovered_desc(Actor::description(hovered, &self.actors).as_str());
         } else {
             self.ui.hovered_desc("");
         }

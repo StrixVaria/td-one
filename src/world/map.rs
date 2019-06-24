@@ -135,6 +135,11 @@ impl Map {
     }
 
     pub fn get_bounds(&self) -> WorldBounds {
-        WorldBounds::new(0.0, 0.0, self.width as f64 * GRID_TILE_SIZE, self.height as f64 * GRID_TILE_SIZE)
+        WorldBounds::new(
+            0.0,
+            0.0,
+            self.width as f64 * GRID_TILE_SIZE,
+            self.height as f64 * GRID_TILE_SIZE,
+        )
     }
 }

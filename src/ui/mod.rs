@@ -18,9 +18,33 @@ impl<'a, C: CharacterCache> GUI<'a, C> {
     pub const FONT_SIZE: FontSize = 12;
 
     pub fn new(width: f64, height: f64, glyph_cache: &'a mut C) -> Self {
-        let mouse_box = TextBox::new("", 1000.0, Self::FONT_SIZE, width, 0.0, AnchorPoint::TopRight, glyph_cache);
-        let hovered_box = TextBox::new("", width / 2.0, Self::FONT_SIZE, width, height, AnchorPoint::BottomRight, glyph_cache);
-        let selected_box = TextBox::new("", width / 2.0, Self::FONT_SIZE, 0.0, height, AnchorPoint::BottomLeft, glyph_cache);
+        let mouse_box = TextBox::new(
+            "",
+            1000.0,
+            Self::FONT_SIZE,
+            width,
+            0.0,
+            AnchorPoint::TopRight,
+            glyph_cache,
+        );
+        let hovered_box = TextBox::new(
+            "",
+            width / 2.0,
+            Self::FONT_SIZE,
+            width,
+            height,
+            AnchorPoint::BottomRight,
+            glyph_cache,
+        );
+        let selected_box = TextBox::new(
+            "",
+            width / 2.0,
+            Self::FONT_SIZE,
+            0.0,
+            height,
+            AnchorPoint::BottomLeft,
+            glyph_cache,
+        );
         Self {
             mouse_coords: mouse_box,
             hovered_actor: hovered_box,
@@ -42,9 +66,11 @@ impl<'a, C: CharacterCache> GUI<'a, C> {
 
     pub fn resize(&mut self, w: f64, h: f64) {
         self.mouse_coords.reposition(w, 0.0, AnchorPoint::TopRight);
-        self.hovered_actor.reposition(w, h, AnchorPoint::BottomRight);
+        self.hovered_actor
+            .reposition(w, h, AnchorPoint::BottomRight);
         self.hovered_actor.set_width(w / 2.0, self.glyph_cache);
-        self.selected_actor.reposition(0.0, h, AnchorPoint::BottomLeft);
+        self.selected_actor
+            .reposition(0.0, h, AnchorPoint::BottomLeft);
         self.selected_actor.set_width(w / 2.0, self.glyph_cache);
     }
 
