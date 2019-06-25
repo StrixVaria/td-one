@@ -160,15 +160,18 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
 
     pub fn mouse_up(&mut self) {
         if self.mouse.barely_moved() {
-            // TODO: Handle click event for real.
-            let qt = self.build_quadtree();
-            self.set_selected_actor(&qt);
+            if !self.ui.handle_click(self.mouse.x, self.mouse.y) {
+                let qt = self.build_quadtree();
+                self.set_selected_actor(&qt);
+            }
         }
         self.mouse.pressed = false;
     }
 
     pub fn mouse_scroll(&mut self, up: bool) {
-        self.offset.zoom(up, self.mouse.x, self.mouse.y);
+        if !self.ui.handle_scroll(self.mouse.x, self.mouse.y, up) {
+            self.offset.zoom(up, self.mouse.x, self.mouse.y);
+        }
     }
 
     pub fn resize(&mut self, w: f64, h: f64) {

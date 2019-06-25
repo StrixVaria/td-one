@@ -17,6 +17,7 @@ pub struct TextBox<C: CharacterCache> {
     lines: Vec<String>,
     width: f64,
     display_lines: Option<usize>,
+    line_offset: usize,
     size: FontSize,
     cache_type: PhantomData<*const C>,
     abs_x: f64,
@@ -42,6 +43,7 @@ impl<C: CharacterCache> TextBox<C> {
             lines: get_lines(text, width, size, glyph_cache, Self::MARGIN),
             width,
             display_lines: None,
+            line_offset: 0,
             size,
             cache_type: PhantomData,
             x,
@@ -78,12 +80,12 @@ impl<C: CharacterCache> TextBox<C> {
         );
         if let Some(num_lines) = self.display_lines {
             let mut lines_rendered = 0;
-            let mut line_index = 0;
+            let mut line_index = self.line_offset;
             while lines_rendered < num_lines {
                 if line_index >= self.lines.len() {
                     break;
                 }
-                let line_h = self.size as f64 * (line_index + 1) as f64;
+                let line_h = self.size as f64 * (lines_rendered + 1) as f64;
                 let t = c.transform.trans(
                     self.abs_x + Self::MARGIN * 2.0,
                     self.abs_y + line_h + Self::MARGIN * 1.5,
@@ -173,6 +175,22 @@ impl<C: CharacterCache> TextBox<C> {
         };
         self.abs_x = x;
         self.abs_y = y;
+    }
+
+    pub fn in_bounds(&self, x: f64, y: f64) -> bool {
+        x >= self.abs_x && x <= self.abs_x + self.width && y >= self.abs_y && y <= self.abs_y + self.height()
+    }
+
+    pub fn scroll(&mut self, up: bool) {
+        if up {
+            if self.line_offset > 0 {
+                self.line_offset -= 1;
+            }
+        } else {
+            if self.line_offset < self.lines.len() - 1 {
+                self.line_offset += 1;
+            }
+        }
     }
 }
 
