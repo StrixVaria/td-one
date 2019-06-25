@@ -1,6 +1,7 @@
 use std::time::Instant;
 
 use crate::world::*;
+use crate::anim::{Animation, AnimationType};
 use map::WorldBounds;
 
 #[derive(Debug, Clone)]
@@ -157,6 +158,7 @@ pub struct TaskCompletion {
     pub prev_target: Option<Target>,
     pub new_actor: Option<Actor>,
     pub dead_actors: Option<Vec<usize>>,
+    pub new_anim: Option<Animation>,
 }
 
 impl TaskCompletion {
@@ -166,6 +168,7 @@ impl TaskCompletion {
             new_actor: None,
             dead_actors: None,
             prev_target: None,
+            new_anim: None,
         }
     }
 
@@ -190,6 +193,11 @@ impl TaskCompletion {
 
     pub fn targeted(mut self, target: Option<Target>) -> Self {
         self.prev_target = target;
+        self
+    }
+
+    pub fn animate(mut self, animation: Animation) -> Self {
+        self.new_anim = Some(animation);
         self
     }
 }
@@ -457,8 +465,9 @@ fn explode_callback(
     qt: &QuadTree<ActorRef>,
     _bounds: &WorldBounds,
 ) -> TaskCompletion {
-    let targets = qt.query(&Region::new_circle(actors[i].x, actors[i].y, 25.0));
-    let mut ret = TaskCompletion::ai_choice();
+    let explosion_radius = 25.0;
+    let targets = qt.query(&Region::new_circle(actors[i].x, actors[i].y, explosion_radius));
+    let mut ret = TaskCompletion::ai_choice().animate(Animation::new(AnimationType::Explosion, actors[i].x, actors[i].y, explosion_radius));
     for target in targets.iter() {
         ret = ret.kill(target.id);
     }

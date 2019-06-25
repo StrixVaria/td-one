@@ -71,6 +71,7 @@ impl Actor {
     ) -> UpdateResults {
         let mut new_actors = vec![];
         let mut dead_actors = vec![];
+        let mut new_animations = vec![];
         for i in 0..actors.len() {
             let task_completion = Task::execute(i, dt, actors, qt, bounds);
             if let Some(actor) = task_completion.new_actor {
@@ -82,6 +83,9 @@ impl Actor {
                         dead_actors.push(actor_id);
                     }
                 }
+            }
+            if let Some(animation) = task_completion.new_anim {
+                new_animations.push(animation);
             }
             match task_completion.next_action {
                 NextAction::AiChoice => {
@@ -99,6 +103,7 @@ impl Actor {
         UpdateResults {
             new_actors,
             dead_actors,
+            new_animations,
         }
     }
 

@@ -26,6 +26,9 @@ use world::*;
 mod ui;
 use ui::*;
 
+mod anim;
+use anim::*;
+
 mod qt;
 use qt::*;
 
@@ -38,6 +41,7 @@ const MAX_SCALE: f64 = 5.0;
 struct Game<'a, 'b, C: CharacterCache> {
     map: Map,
     actors: Vec<Actor>,
+    animations: Vec<Animation>,
     hovered_actor: Option<usize>,
     selected_actor: Option<usize>,
     mouse: MouseDetails,
@@ -54,6 +58,7 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
         let mut game = Self {
             map: Map::new(width, height),
             actors: vec![],
+            animations: vec![],
             hovered_actor: None,
             selected_actor: None,
             mouse: MouseDetails::new(),
@@ -94,6 +99,9 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
     pub fn update(&mut self, args: &UpdateArgs) {
         let qt = self.build_quadtree();
         if !self.paused {
+            for animation in self.animations.iter_mut() {
+                animation.update(args.dt);
+            }
             let mut results = Actor::update_all(args.dt, &mut self.actors, &qt, &self.map.get_bounds());
             if !results.dead_actors.is_empty() {
                 results.dead_actors.sort();
@@ -115,6 +123,9 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
             for mut actor in results.new_actors.drain(..) {
                 actor.name = self.get_name();
                 self.actors.push(actor);
+            }
+            for animation in results.new_animations.drain(..) {
+                self.animations.push(animation);
             }
         }
         self.find_hovered_actor(&qt);
@@ -141,6 +152,9 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
         if let Some(actor_index) = self.selected_actor {
             self.actors[actor_index].render_extras(&self.actors, world_transform, g);
         }
+        self.animations.retain(|anim| {
+            !anim.render(world_transform, g)
+        });
         self.ui.render(self.paused, c, g)
     }
 

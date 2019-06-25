@@ -10,6 +10,7 @@ pub mod task;
 mod vector;
 
 use crate::qt::*;
+use crate::anim::Animation;
 pub use actor::*;
 pub use ai::*;
 pub use task::*;
@@ -17,6 +18,7 @@ pub use task::*;
 pub struct UpdateResults {
     pub new_actors: Vec<Actor>,
     pub dead_actors: Vec<usize>,
+    pub new_animations: Vec<Animation>,
 }
 
 #[derive(Clone, Copy, Debug)]
