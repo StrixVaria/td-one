@@ -16,6 +16,7 @@ pub enum AnchorPoint {
 pub struct TextBox<C: CharacterCache> {
     lines: Vec<String>,
     width: f64,
+    display_lines: Option<usize>,
     size: FontSize,
     cache_type: PhantomData<*const C>,
     abs_x: f64,
@@ -40,6 +41,7 @@ impl<C: CharacterCache> TextBox<C> {
         let mut text_box = TextBox {
             lines: get_lines(text, width, size, glyph_cache, Self::MARGIN),
             width,
+            display_lines: None,
             size,
             cache_type: PhantomData,
             x,
@@ -52,7 +54,7 @@ impl<C: CharacterCache> TextBox<C> {
         text_box
     }
 
-    pub fn render<G>(&self, glyph_cache: &mut C, c: Context, g: &mut G)
+    pub fn render<G>(&self, glyph_cache: &mut C, c: Context, g: &mut G) -> Result<(), C::Error>
     where
         G: Graphics<Texture = <C as character::CharacterCache>::Texture>,
     {
@@ -74,21 +76,43 @@ impl<C: CharacterCache> TextBox<C> {
             c.transform,
             g,
         );
-        for (i, line) in self.lines.iter().enumerate() {
-            let line_h = self.size as f64 * (i + 1) as f64;
-            let t = c.transform.trans(
-                self.abs_x + Self::MARGIN * 2.0,
-                self.abs_y + line_h + Self::MARGIN * 1.5,
-            );
-            // TODO: Not this.
-            match text(color::hex("ffffff"), self.size, line, glyph_cache, t, g) {
-                _ => {}
+        if let Some(num_lines) = self.display_lines {
+            let mut lines_rendered = 0;
+            let mut line_index = 0;
+            while lines_rendered < num_lines {
+                if line_index >= self.lines.len() {
+                    break;
+                }
+                let line_h = self.size as f64 * (line_index + 1) as f64;
+                let t = c.transform.trans(
+                    self.abs_x + Self::MARGIN * 2.0,
+                    self.abs_y + line_h + Self::MARGIN * 1.5,
+                );
+                text(color::hex("ffffff"), self.size, self.lines[line_index].as_str(), glyph_cache, t, g)?;
+                lines_rendered += 1;
+                line_index += 1;
+            }
+        } else {
+            for (i, line) in self.lines.iter().enumerate() {
+                let line_h = self.size as f64 * (i + 1) as f64;
+                let t = c.transform.trans(
+                    self.abs_x + Self::MARGIN * 2.0,
+                    self.abs_y + line_h + Self::MARGIN * 1.5,
+                );
+                text(color::hex("ffffff"), self.size, line, glyph_cache, t, g)?;
             }
         }
+        Ok(())
     }
 
     pub fn height(&self) -> f64 {
-        self.lines.len() as f64 * self.size as f64 + 5.0 * Self::MARGIN
+        if let Some(height) = self.display_lines {
+            // Only display the number of lines indicated.
+            height as f64 * self.size as f64 + 5.0 * Self::MARGIN
+        } else {
+            // Show all lines, and let the box scale up/down to whatever size necessary.
+            self.lines.len() as f64 * self.size as f64 + 5.0 * Self::MARGIN
+        }
     }
 
     // pub fn width(&self) -> f64 {
@@ -117,6 +141,10 @@ impl<C: CharacterCache> TextBox<C> {
             Self::MARGIN,
         );
         self.width = width;
+    }
+
+    pub fn set_height(&mut self, height: usize) {
+        self.display_lines = Some(height);
     }
 
     pub fn update_text(&mut self, new_text: &str, glyph_cache: &mut C) {

@@ -27,7 +27,7 @@ impl<'a, C: CharacterCache> GUI<'a, C> {
             AnchorPoint::TopRight,
             glyph_cache,
         );
-        let hovered_box = TextBox::new(
+        let mut hovered_box = TextBox::new(
             "",
             width / 2.0,
             Self::FONT_SIZE,
@@ -36,7 +36,9 @@ impl<'a, C: CharacterCache> GUI<'a, C> {
             AnchorPoint::BottomRight,
             glyph_cache,
         );
-        let selected_box = TextBox::new(
+        hovered_box.set_height(7);
+        hovered_box.realign();
+        let mut selected_box = TextBox::new(
             "",
             width / 2.0,
             Self::FONT_SIZE,
@@ -45,6 +47,8 @@ impl<'a, C: CharacterCache> GUI<'a, C> {
             AnchorPoint::BottomLeft,
             glyph_cache,
         );
+        selected_box.set_height(7);
+        selected_box.realign();
         Self {
             mouse_coords: mouse_box,
             hovered_actor: hovered_box,
@@ -55,23 +59,24 @@ impl<'a, C: CharacterCache> GUI<'a, C> {
         }
     }
 
-    pub fn render<G>(&mut self, c: Context, g: &mut G)
+    pub fn render<G>(&mut self, c: Context, g: &mut G) -> Result<(), C::Error>
     where
         G: Graphics<Texture = <C as character::CharacterCache>::Texture>,
     {
-        self.mouse_coords.render(&mut self.glyph_cache, c, g);
-        self.hovered_actor.render(&mut self.glyph_cache, c, g);
-        self.selected_actor.render(&mut self.glyph_cache, c, g);
+        self.mouse_coords.render(&mut self.glyph_cache, c, g)?;
+        self.hovered_actor.render(&mut self.glyph_cache, c, g)?;
+        self.selected_actor.render(&mut self.glyph_cache, c, g)?;
+        Ok(())
     }
 
     pub fn resize(&mut self, w: f64, h: f64) {
         self.mouse_coords.reposition(w, 0.0, AnchorPoint::TopRight);
+        self.hovered_actor.set_width(w / 2.0, self.glyph_cache);
         self.hovered_actor
             .reposition(w, h, AnchorPoint::BottomRight);
-        self.hovered_actor.set_width(w / 2.0, self.glyph_cache);
+        self.selected_actor.set_width(w / 2.0, self.glyph_cache);
         self.selected_actor
             .reposition(0.0, h, AnchorPoint::BottomLeft);
-        self.selected_actor.set_width(w / 2.0, self.glyph_cache);
     }
 
     pub fn mouse_pos(&mut self, x: f64, y: f64) {
@@ -82,12 +87,18 @@ impl<'a, C: CharacterCache> GUI<'a, C> {
     }
 
     pub fn hovered_desc(&mut self, desc: &str) {
-        self.hovered_actor.update_text(desc, &mut self.glyph_cache);
-        self.hovered_actor.realign();
+        if desc == "" {
+            self.hovered_actor.update_text("Hover over a unit for details.", &mut self.glyph_cache);
+        } else {
+            self.hovered_actor.update_text(desc, &mut self.glyph_cache);
+        }
     }
 
     pub fn selected_desc(&mut self, desc: &str) {
-        self.selected_actor.update_text(desc, &mut self.glyph_cache);
-        self.selected_actor.realign();
+        if desc == "" {
+            self.selected_actor.update_text("Click on a unit to pin details here.", &mut self.glyph_cache);
+        } else {
+            self.selected_actor.update_text(desc, &mut self.glyph_cache);
+        }
     }
 }

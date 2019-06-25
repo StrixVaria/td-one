@@ -117,7 +117,7 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
         self.update_ui();
     }
 
-    pub fn render<G>(&mut self, c: Context, g: &mut G)
+    pub fn render<G>(&mut self, c: Context, g: &mut G) -> Result<(), C::Error>
     where
         G: Graphics<Texture = <C as character::CharacterCache>::Texture>,
     {
@@ -137,7 +137,7 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
         if let Some(actor_index) = self.selected_actor {
             self.actors[actor_index].render_extras(&self.actors, world_transform, g);
         }
-        self.ui.render(c, g);
+        self.ui.render(c, g)
     }
 
     pub fn mouse_at(&mut self, x: f64, y: f64) {
@@ -381,7 +381,10 @@ fn main() {
 
         e.render(|args| {
             gl.draw(args.viewport(), |c, g| {
-                game.render(c, g);
+                match game.render(c, g) {
+                    Err(_) => eprintln!("Issue rendering text!"),
+                    _ => ()
+                }
             })
         });
 
