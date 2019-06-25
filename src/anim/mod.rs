@@ -31,12 +31,19 @@ impl Animation {
     pub fn render<G: Graphics>(&self, c: Matrix2d, g: &mut G) -> bool {
         use AnimationType::*;
         match self.anim_type {
-            Explosion => explosion_animation(self.x, self.y, self.size, self.elapsed, c, g)
+            Explosion => explosion_animation(self.x, self.y, self.size, self.elapsed, c, g),
         }
     }
 }
 
-fn explosion_animation<G: Graphics>(x: f64, y: f64, size: f64, elapsed: f64, c: Matrix2d, g: &mut G) -> bool {
+fn explosion_animation<G: Graphics>(
+    x: f64,
+    y: f64,
+    size: f64,
+    elapsed: f64,
+    c: Matrix2d,
+    g: &mut G,
+) -> bool {
     const ANIM_LENGTH: f64 = 3.0;
     let color = [0.9, 0.3, 0.0, 1.0 - (elapsed as f32 / ANIM_LENGTH as f32)];
     ellipse(color, rectangle::centered_square(x, y, size), c, g);

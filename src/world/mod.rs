@@ -9,8 +9,8 @@ pub mod task;
 
 mod vector;
 
-use crate::qt::*;
 use crate::anim::Animation;
+use crate::qt::*;
 pub use actor::*;
 pub use ai::*;
 pub use task::*;

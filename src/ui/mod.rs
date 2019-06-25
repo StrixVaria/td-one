@@ -91,11 +91,9 @@ impl<'a, C: CharacterCache> GUI<'a, C> {
     pub fn resize(&mut self, w: f64, h: f64) {
         self.text_boxes[Self::MOUSE_BOX].reposition(w, 0.0, AnchorPoint::TopRight);
         self.text_boxes[Self::HOVERED_BOX].set_width(w / 2.0, self.glyph_cache);
-        self.text_boxes[Self::HOVERED_BOX]
-            .reposition(w, h, AnchorPoint::BottomRight);
+        self.text_boxes[Self::HOVERED_BOX].reposition(w, h, AnchorPoint::BottomRight);
         self.text_boxes[Self::SELECTED_BOX].set_width(w / 2.0, self.glyph_cache);
-        self.text_boxes[Self::SELECTED_BOX]
-            .reposition(0.0, h, AnchorPoint::BottomLeft);
+        self.text_boxes[Self::SELECTED_BOX].reposition(0.0, h, AnchorPoint::BottomLeft);
     }
 
     pub fn mouse_pos(&mut self, x: f64, y: f64) {
@@ -107,7 +105,8 @@ impl<'a, C: CharacterCache> GUI<'a, C> {
 
     pub fn hovered_desc(&mut self, desc: &str) {
         if desc == "" {
-            self.text_boxes[Self::HOVERED_BOX].update_text("Hover over a unit for details.", &mut self.glyph_cache);
+            self.text_boxes[Self::HOVERED_BOX]
+                .update_text("Hover over a unit for details.", &mut self.glyph_cache);
             self.text_boxes[Self::HOVERED_BOX].reset_scroll();
         } else {
             self.text_boxes[Self::HOVERED_BOX].update_text(desc, &mut self.glyph_cache);
@@ -116,7 +115,10 @@ impl<'a, C: CharacterCache> GUI<'a, C> {
 
     pub fn selected_desc(&mut self, desc: &str) {
         if desc == "" {
-            self.text_boxes[Self::SELECTED_BOX].update_text("Click on a unit to pin details here.", &mut self.glyph_cache);
+            self.text_boxes[Self::SELECTED_BOX].update_text(
+                "Click on a unit to pin details here.",
+                &mut self.glyph_cache,
+            );
             self.text_boxes[Self::SELECTED_BOX].reset_scroll();
         } else {
             self.text_boxes[Self::SELECTED_BOX].update_text(desc, &mut self.glyph_cache);

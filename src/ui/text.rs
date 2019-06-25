@@ -90,7 +90,14 @@ impl<C: CharacterCache> TextBox<C> {
                     self.abs_x + Self::MARGIN * 2.0,
                     self.abs_y + line_h + Self::MARGIN,
                 );
-                text(color::hex("ffffff"), self.size, self.lines[line_index].as_str(), glyph_cache, t, g)?;
+                text(
+                    color::hex("ffffff"),
+                    self.size,
+                    self.lines[line_index].as_str(),
+                    glyph_cache,
+                    t,
+                    g,
+                )?;
                 lines_rendered += 1;
                 line_index += 1;
             }
@@ -183,7 +190,10 @@ impl<C: CharacterCache> TextBox<C> {
     }
 
     pub fn in_bounds(&self, x: f64, y: f64) -> bool {
-        x >= self.abs_x && x <= self.abs_x + self.width && y >= self.abs_y && y <= self.abs_y + self.height()
+        x >= self.abs_x
+            && x <= self.abs_x + self.width
+            && y >= self.abs_y
+            && y <= self.abs_y + self.height()
     }
 
     pub fn reset_scroll(&mut self) {

@@ -102,7 +102,8 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
             for animation in self.animations.iter_mut() {
                 animation.update(args.dt);
             }
-            let mut results = Actor::update_all(args.dt, &mut self.actors, &qt, &self.map.get_bounds());
+            let mut results =
+                Actor::update_all(args.dt, &mut self.actors, &qt, &self.map.get_bounds());
             if !results.dead_actors.is_empty() {
                 results.dead_actors.sort();
                 for dead_actor_index in results.dead_actors.into_iter().rev() {
@@ -152,9 +153,8 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
         if let Some(actor_index) = self.selected_actor {
             self.actors[actor_index].render_extras(&self.actors, world_transform, g);
         }
-        self.animations.retain(|anim| {
-            !anim.render(world_transform, g)
-        });
+        self.animations
+            .retain(|anim| !anim.render(world_transform, g));
         self.ui.render(self.paused, c, g)
     }
 
@@ -405,11 +405,9 @@ fn main() {
         });
 
         e.render(|args| {
-            gl.draw(args.viewport(), |c, g| {
-                match game.render(c, g) {
-                    Err(_) => eprintln!("Issue rendering text!"),
-                    _ => ()
-                }
+            gl.draw(args.viewport(), |c, g| match game.render(c, g) {
+                Err(_) => eprintln!("Issue rendering text!"),
+                _ => (),
             })
         });
 
@@ -424,7 +422,7 @@ fn main() {
         e.press(|args| match args {
             Button::Mouse(MouseButton::Left) => {
                 game.mouse_down();
-            },
+            }
             Button::Keyboard(Key::Space) => {
                 game.toggle_pause();
             }

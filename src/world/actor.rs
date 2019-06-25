@@ -221,7 +221,7 @@ impl ActorBody {
             ActorBody::Building => {
                 let half_size = size / 2.0;
                 Region::new_rect(x - half_size, y - half_size, size, size)
-            },
+            }
         }
     }
 
@@ -233,7 +233,12 @@ impl ActorBody {
 
     fn building_render<G: Graphics>(&self, x: f64, y: f64, t: Matrix2d, g: &mut G) {
         let color = color::hex("888888");
-        rectangle(color, rectangle::centered_square(x, y, self.size() / 2.0), t, g);
+        rectangle(
+            color,
+            rectangle::centered_square(x, y, self.size() / 2.0),
+            t,
+            g,
+        );
     }
 
     fn size(&self) -> f64 {

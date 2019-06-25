@@ -1,7 +1,7 @@
 use std::time::Instant;
 
-use crate::world::*;
 use crate::anim::{Animation, AnimationType};
+use crate::world::*;
 use map::WorldBounds;
 
 #[derive(Debug, Clone)]
@@ -466,8 +466,17 @@ fn explode_callback(
     _bounds: &WorldBounds,
 ) -> TaskCompletion {
     let explosion_radius = 25.0;
-    let targets = qt.query(&Region::new_circle(actors[i].x, actors[i].y, explosion_radius));
-    let mut ret = TaskCompletion::ai_choice().animate(Animation::new(AnimationType::Explosion, actors[i].x, actors[i].y, explosion_radius));
+    let targets = qt.query(&Region::new_circle(
+        actors[i].x,
+        actors[i].y,
+        explosion_radius,
+    ));
+    let mut ret = TaskCompletion::ai_choice().animate(Animation::new(
+        AnimationType::Explosion,
+        actors[i].x,
+        actors[i].y,
+        explosion_radius,
+    ));
     for target in targets.iter() {
         ret = ret.kill(target.id);
     }
