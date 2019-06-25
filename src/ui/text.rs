@@ -181,6 +181,10 @@ impl<C: CharacterCache> TextBox<C> {
         x >= self.abs_x && x <= self.abs_x + self.width && y >= self.abs_y && y <= self.abs_y + self.height()
     }
 
+    pub fn reset_scroll(&mut self) {
+        self.line_offset = 0;
+    }
+
     pub fn scroll(&mut self, up: bool) {
         if up {
             if self.line_offset > 0 {

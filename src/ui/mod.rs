@@ -92,6 +92,7 @@ impl<'a, C: CharacterCache> GUI<'a, C> {
     pub fn hovered_desc(&mut self, desc: &str) {
         if desc == "" {
             self.text_boxes[Self::HOVERED_BOX].update_text("Hover over a unit for details.", &mut self.glyph_cache);
+            self.text_boxes[Self::HOVERED_BOX].reset_scroll();
         } else {
             self.text_boxes[Self::HOVERED_BOX].update_text(desc, &mut self.glyph_cache);
         }
@@ -100,6 +101,7 @@ impl<'a, C: CharacterCache> GUI<'a, C> {
     pub fn selected_desc(&mut self, desc: &str) {
         if desc == "" {
             self.text_boxes[Self::SELECTED_BOX].update_text("Click on a unit to pin details here.", &mut self.glyph_cache);
+            self.text_boxes[Self::SELECTED_BOX].reset_scroll();
         } else {
             self.text_boxes[Self::SELECTED_BOX].update_text(desc, &mut self.glyph_cache);
         }
