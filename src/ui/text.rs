@@ -10,7 +10,7 @@ pub enum AnchorPoint {
     TopRight,
     BottomLeft,
     BottomRight,
-    // Center,
+    Center,
 }
 
 pub struct TextBox<C: CharacterCache> {
@@ -88,7 +88,7 @@ impl<C: CharacterCache> TextBox<C> {
                 let line_h = self.size as f64 * (lines_rendered + 1) as f64;
                 let t = c.transform.trans(
                     self.abs_x + Self::MARGIN * 2.0,
-                    self.abs_y + line_h + Self::MARGIN * 1.5,
+                    self.abs_y + line_h + Self::MARGIN,
                 );
                 text(color::hex("ffffff"), self.size, self.lines[line_index].as_str(), glyph_cache, t, g)?;
                 lines_rendered += 1;
@@ -99,7 +99,7 @@ impl<C: CharacterCache> TextBox<C> {
                 let line_h = self.size as f64 * (i + 1) as f64;
                 let t = c.transform.trans(
                     self.abs_x + Self::MARGIN * 2.0,
-                    self.abs_y + line_h + Self::MARGIN * 1.5,
+                    self.abs_y + line_h + Self::MARGIN,
                 );
                 text(color::hex("ffffff"), self.size, line, glyph_cache, t, g)?;
             }
@@ -172,6 +172,11 @@ impl<C: CharacterCache> TextBox<C> {
             TopRight => (self.x - self.width, self.y),
             BottomLeft => (self.x, self.y - self.height()),
             BottomRight => (self.x - self.width, self.y - self.height()),
+            Center => {
+                let half_width = self.width / 2.0;
+                let half_height = self.height() / 2.0;
+                (self.x - half_width, self.y - half_height)
+            }
         };
         self.abs_x = x;
         self.abs_y = y;

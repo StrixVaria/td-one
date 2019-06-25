@@ -44,6 +44,7 @@ struct Game<'a, 'b, C: CharacterCache> {
     offset: WorldOffset,
     ui: GUI<'b, C>,
     name_generator: Generator<'a>,
+    paused: bool,
 }
 
 impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
@@ -59,6 +60,7 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
             offset: WorldOffset::new(),
             ui: GUI::new(WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT, font),
             name_generator: Generator::default(),
+            paused: false,
         };
         game.center_on(
             width / 2,
@@ -91,27 +93,29 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
 
     pub fn update(&mut self, args: &UpdateArgs) {
         let qt = self.build_quadtree();
-        let mut results = Actor::update_all(args.dt, &mut self.actors, &qt, &self.map.get_bounds());
-        if !results.dead_actors.is_empty() {
-            results.dead_actors.sort();
-            for dead_actor_index in results.dead_actors.into_iter().rev() {
-                if let Some(selected_actor_index) = self.selected_actor {
-                    if selected_actor_index == dead_actor_index {
-                        // If the selected actor is dead, just remove the
-                        // reference.
-                        self.selected_actor = None;
-                    } else if selected_actor_index > dead_actor_index {
-                        // Every time we delete something earlier in the array,
-                        // move our reference back one.
-                        self.selected_actor = Some(selected_actor_index - 1);
+        if !self.paused {
+            let mut results = Actor::update_all(args.dt, &mut self.actors, &qt, &self.map.get_bounds());
+            if !results.dead_actors.is_empty() {
+                results.dead_actors.sort();
+                for dead_actor_index in results.dead_actors.into_iter().rev() {
+                    if let Some(selected_actor_index) = self.selected_actor {
+                        if selected_actor_index == dead_actor_index {
+                            // If the selected actor is dead, just remove the
+                            // reference.
+                            self.selected_actor = None;
+                        } else if selected_actor_index > dead_actor_index {
+                            // Every time we delete something earlier in the array,
+                            // move our reference back one.
+                            self.selected_actor = Some(selected_actor_index - 1);
+                        }
                     }
+                    self.actors.remove(dead_actor_index);
                 }
-                self.actors.remove(dead_actor_index);
             }
-        }
-        for mut actor in results.new_actors.drain(..) {
-            actor.name = self.get_name();
-            self.actors.push(actor);
+            for mut actor in results.new_actors.drain(..) {
+                actor.name = self.get_name();
+                self.actors.push(actor);
+            }
         }
         self.find_hovered_actor(&qt);
         self.update_ui();
@@ -137,7 +141,7 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
         if let Some(actor_index) = self.selected_actor {
             self.actors[actor_index].render_extras(&self.actors, world_transform, g);
         }
-        self.ui.render(c, g)
+        self.ui.render(self.paused, c, g)
     }
 
     pub fn mouse_at(&mut self, x: f64, y: f64) {
@@ -172,6 +176,10 @@ impl<'a, 'b, C: CharacterCache> Game<'a, 'b, C> {
         if !self.ui.handle_scroll(self.mouse.x, self.mouse.y, up) {
             self.offset.zoom(up, self.mouse.x, self.mouse.y);
         }
+    }
+
+    pub fn toggle_pause(&mut self) {
+        self.paused = !self.paused;
     }
 
     pub fn resize(&mut self, w: f64, h: f64) {
@@ -402,6 +410,9 @@ fn main() {
         e.press(|args| match args {
             Button::Mouse(MouseButton::Left) => {
                 game.mouse_down();
+            },
+            Button::Keyboard(Key::Space) => {
+                game.toggle_pause();
             }
             _ => {}
         });

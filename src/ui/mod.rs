@@ -6,6 +6,7 @@ pub mod text;
 pub use text::*;
 
 pub struct GUI<'a, C: CharacterCache> {
+    paused_box: TextBox<C>,
     text_boxes: Vec<TextBox<C>>,
     // mouse_coords: TextBox<C>,
     // hovered_actor: TextBox<C>,
@@ -22,6 +23,17 @@ impl<'a, C: CharacterCache> GUI<'a, C> {
     const SELECTED_BOX: usize = 2;
 
     pub fn new(width: f64, height: f64, glyph_cache: &'a mut C) -> Self {
+        let mut paused_box = TextBox::new(
+            "GAME PAUSED",
+            1000.0,
+            50,
+            width / 2.0,
+            height / 2.0,
+            AnchorPoint::Center,
+            glyph_cache,
+        );
+        paused_box.auto_width(glyph_cache);
+        paused_box.realign();
         let mouse_box = TextBox::new(
             "",
             1000.0,
@@ -55,6 +67,7 @@ impl<'a, C: CharacterCache> GUI<'a, C> {
         selected_box.realign();
         let boxes = vec![mouse_box, hovered_box, selected_box];
         Self {
+            paused_box,
             text_boxes: boxes,
             // screen_width: width,
             // screen_height: height,
@@ -62,12 +75,15 @@ impl<'a, C: CharacterCache> GUI<'a, C> {
         }
     }
 
-    pub fn render<G>(&mut self, c: Context, g: &mut G) -> Result<(), C::Error>
+    pub fn render<G>(&mut self, paused: bool, c: Context, g: &mut G) -> Result<(), C::Error>
     where
         G: Graphics<Texture = <C as character::CharacterCache>::Texture>,
     {
         for text_box in self.text_boxes.iter() {
             text_box.render(&mut self.glyph_cache, c, g)?;
+        }
+        if paused {
+            self.paused_box.render(&mut self.glyph_cache, c, g)?;
         }
         Ok(())
     }
