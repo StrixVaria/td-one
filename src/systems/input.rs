@@ -33,7 +33,8 @@ impl<'a> System<'a> for InputSystem {
             _ => (),
         }
 
-        let results = qt.query(&Region::new_point(input.mouse_x, input.mouse_y));
+        let (mouse_x, mouse_y) = offset.to_local_pixel(input.mouse_x, input.mouse_y);
+        let results = qt.query(&Region::new_point(mouse_x, mouse_y));
         entity_tracker.hovered = if !results.is_empty() {
             Some(results[0].entity)
         } else {
