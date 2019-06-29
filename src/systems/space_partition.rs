@@ -30,8 +30,9 @@ fn get_region(pos: &Position, body: &Body) -> Region {
             Region::new_circle(pos.x, pos.y, body.size)
         },
         BodyShape::Square => {
-            let size = body.size * 2.0;
-            Region::new_rect(pos.x, pos.y, size, size)
+            let half_width = body.size;
+            let width = half_width * 2.0;
+            Region::new_rect(pos.x - half_width, pos.y - half_width, width, width)
         }
     }
 }

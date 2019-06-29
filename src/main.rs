@@ -39,6 +39,11 @@ impl HasRegion for EntityRef {
     }
 }
 
+#[derive(Default)]
+pub struct EntityTracker {
+    hovered: Option<Entity>,
+}
+
 fn main() {
     // PISTON SETUP
     let ref mut window: Sdl2Window = WindowSettings::new(
@@ -67,11 +72,12 @@ fn main() {
     world.add_resource(WorldOffset::new());
     world.add_resource(Input::default());
     world.add_resource::<QuadTree<EntityRef>>(QuadTree::new(RectangleData::new(0.0, 0.0, 0.0, 0.0)));
+    world.add_resource(EntityTracker::default());
 
     let mut update_dispatcher = DispatcherBuilder::new()
         .with(SpacePartitionSystem, "space_partition", &[])
-        .with(InputSystem, "input", &[])
-        .with(TargetingSystem, "targeting", &["input", "space_partition"])
+        .with(InputSystem, "input", &["space_partition"])
+        .with(TargetingSystem, "targeting", &["input"])
         .with(MotionSystem, "motion", &["targeting"])
         .with(BoundaryConstraintSystem, "boundary_constraint", &["motion"])
         .build();

@@ -3,7 +3,7 @@ use opengl_graphics::{GlGraphics, GlyphCache};
 use specs::{Join, Read, ReadExpect, ReadStorage, System};
 use viewport::Viewport;
 
-use crate::{components::*, input::Input, map::Map, offset::WorldOffset};
+use crate::{components::*, input::Input, map::Map, offset::WorldOffset, EntityTracker};
 
 pub struct RenderSystem<'m> {
     pub gl: GlGraphics,
@@ -16,12 +16,13 @@ impl<'a, 'm> System<'a> for RenderSystem<'m> {
         ReadExpect<'a, Map>,
         Read<'a, WorldOffset>,
         Read<'a, Input>,
+        Read<'a, EntityTracker>,
         ReadStorage<'a, Body>,
         ReadStorage<'a, Position>,
         ReadStorage<'a, TargetLocation>,
     );
 
-    fn run(&mut self, (viewport, map, offset, input, body, position, target): Self::SystemData) {
+    fn run(&mut self, (viewport, map, offset, input, entity_tracker, body, position, target): Self::SystemData) {
         let ref mut gc = self.gc;
         self.gl.draw(*viewport, |c, g| {
             let transform = c
@@ -70,6 +71,10 @@ impl<'a, 'm> System<'a> for RenderSystem<'m> {
                 g,
             )
             .unwrap();
+            // TODO: Actually render some UI thing for hovered entity.
+            if let Some(entity) = entity_tracker.hovered {
+                println!("Hovering over {:?}", entity);
+            }
         })
     }
 }

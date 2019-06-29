@@ -1,16 +1,18 @@
-use specs::{System, Write};
+use specs::{System, Write, ReadExpect};
 
 use crate::{
     input::{Input, MousePressedState, MouseScrollDir},
     offset::WorldOffset,
+    EntityTracker, EntityRef,
+    qt::{QuadTree, Region},
 };
 
 pub struct InputSystem;
 
 impl<'a> System<'a> for InputSystem {
-    type SystemData = (Write<'a, Input>, Write<'a, WorldOffset>);
+    type SystemData = (ReadExpect<'a, QuadTree<EntityRef>>, Write<'a, Input>, Write<'a, EntityTracker>, Write<'a, WorldOffset>);
 
-    fn run(&mut self, (mut input, mut offset): Self::SystemData) {
+    fn run(&mut self, (qt, mut input, mut entity_tracker, mut offset): Self::SystemData) {
         match &input.mouse_scroll_dir {
             MouseScrollDir::None => (),
             dir => offset.zoom(dir.into(), input.mouse_x, input.mouse_y),
@@ -29,6 +31,13 @@ impl<'a> System<'a> for InputSystem {
                 offset.slide(-dx, -dy);
             }
             _ => (),
+        }
+
+        let results = qt.query(&Region::new_point(input.mouse_x, input.mouse_y));
+        entity_tracker.hovered = if !results.is_empty() {
+            Some(results[0].entity)
+        } else {
+            None
         }
     }
 }
