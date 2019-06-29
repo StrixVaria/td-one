@@ -13,7 +13,7 @@ impl Vector {
     }
 
     /// Does not cache magnitude. Avoid reusing often.
-    pub fn unit(&mut self) -> Vector {
+    pub fn unit(&self) -> Vector {
         *self / self.mag()
     }
 

@@ -4,7 +4,7 @@ use piston::{
     PressEvent, ReleaseEvent, RenderEvent, UpdateEvent, WindowSettings,
 };
 use sdl2_window::Sdl2Window;
-use specs::{Builder, DispatcherBuilder, World};
+use specs::{Builder, DispatcherBuilder, World, Entity};
 use viewport::Viewport;
 
 const WINDOW_DEFAULT_WIDTH: f64 = 1024.0;
@@ -23,6 +23,21 @@ mod offset;
 use offset::WorldOffset;
 mod input;
 use input::Input;
+
+mod qt;
+use qt::{QuadTree, RectangleData, Region, HasRegion};
+
+#[derive(Copy, Clone, Debug)]
+pub struct EntityRef {
+    entity: Entity,
+    region: Region,
+}
+
+impl HasRegion for EntityRef {
+    fn get_region(&self) -> Region {
+        self.region
+    }
+}
 
 fn main() {
     // PISTON SETUP
@@ -51,10 +66,12 @@ fn main() {
     world.add_resource(Map::new(60, 60));
     world.add_resource(WorldOffset::new());
     world.add_resource(Input::default());
+    world.add_resource::<QuadTree<EntityRef>>(QuadTree::new(RectangleData::new(0.0, 0.0, 0.0, 0.0)));
 
     let mut update_dispatcher = DispatcherBuilder::new()
+        .with(SpacePartitionSystem, "space_partition", &[])
         .with(InputSystem, "input", &[])
-        .with(TargetingSystem, "targeting", &["input"])
+        .with(TargetingSystem, "targeting", &["input", "space_partition"])
         .with(MotionSystem, "motion", &["targeting"])
         .with(BoundaryConstraintSystem, "boundary_constraint", &["motion"])
         .build();

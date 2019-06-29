@@ -13,6 +13,9 @@ pub use input::*;
 mod boundary_constraint;
 pub use boundary_constraint::*;
 
+mod space_partition;
+pub use space_partition::*;
+
 #[derive(Default)]
 pub struct DeltaTime(f64);
 
