@@ -31,19 +31,19 @@ impl WorldBounds {
         x >= self.x && x <= self.x + self.w && y >= self.y && y <= self.y + self.h
     }
 
-    pub fn constrain(&self, mut x: f64, mut y: f64) -> (f64, f64) {
-        if x < self.x {
-            x = self.x;
-        } else if x > self.x + self.w {
-            x = self.x + self.w;
-        }
-        if y < self.y {
-            y = self.y;
-        } else if y >= self.y + self.h {
-            y = self.y + self.h;
-        }
-        (x, y)
-    }
+    // pub fn constrain(&self, mut x: f64, mut y: f64) -> (f64, f64) {
+    //     if x < self.x {
+    //         x = self.x;
+    //     } else if x > self.x + self.w {
+    //         x = self.x + self.w;
+    //     }
+    //     if y < self.y {
+    //         y = self.y;
+    //     } else if y >= self.y + self.h {
+    //         y = self.y + self.h;
+    //     }
+    //     (x, y)
+    // }
 }
 
 pub struct Map {
@@ -130,9 +130,9 @@ impl Map {
         }
     }
 
-    pub fn get_cell_loc(&self, x: usize, y: usize) -> (f64, f64) {
-        (x as f64 * GRID_TILE_SIZE, y as f64 * GRID_TILE_SIZE)
-    }
+    // pub fn get_cell_loc(&self, x: usize, y: usize) -> (f64, f64) {
+    //     (x as f64 * GRID_TILE_SIZE, y as f64 * GRID_TILE_SIZE)
+    // }
 
     pub fn get_bounds(&self) -> WorldBounds {
         WorldBounds::new(
