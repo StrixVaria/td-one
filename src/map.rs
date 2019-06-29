@@ -3,6 +3,8 @@ use graphics::types::Color;
 use graphics::*;
 use rand::Rng;
 
+use crate::{components::Position};
+
 const GRID_TILE_SIZE: f64 = 12.0;
 
 pub enum Tile {
@@ -31,19 +33,20 @@ impl WorldBounds {
         x >= self.x && x <= self.x + self.w && y >= self.y && y <= self.y + self.h
     }
 
-    // pub fn constrain(&self, mut x: f64, mut y: f64) -> (f64, f64) {
-    //     if x < self.x {
-    //         x = self.x;
-    //     } else if x > self.x + self.w {
-    //         x = self.x + self.w;
-    //     }
-    //     if y < self.y {
-    //         y = self.y;
-    //     } else if y >= self.y + self.h {
-    //         y = self.y + self.h;
-    //     }
-    //     (x, y)
-    // }
+    pub fn constrain(&self, position: Position) -> Position {
+        let mut position = position;
+        if position.x < self.x {
+            position.x = self.x;
+        } else if position.x > self.x + self.w {
+            position.x = self.x + self.w;
+        }
+        if position.y < self.y {
+            position.y = self.y;
+        } else if position.y >= self.y + self.h {
+            position.y = self.y + self.h;
+        }
+        position
+    }
 }
 
 pub struct Map {

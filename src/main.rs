@@ -56,6 +56,7 @@ fn main() {
         .with(InputSystem, "input", &[])
         .with(TargetingSystem, "targeting", &["input"])
         .with(MotionSystem, "motion", &["targeting"])
+        .with(BoundaryConstraintSystem, "boundary_constraint", &["motion"])
         .build();
     update_dispatcher.setup(&mut world.res);
     let mut render_dispatcher = DispatcherBuilder::new()
@@ -116,7 +117,7 @@ fn create_entities(world: &mut World) {
     let e1 = world
         .create_entity()
         .with(Position { x: 50.0, y: 50.0 })
-        .with(Mobility::Omnidirectional { speed: 10.0 })
+        .with(Mobility::Omnidirectional { speed: 30.0 })
         .with(TargetLocation {
             position: Position {
                 x: 1000.0,
@@ -132,7 +133,7 @@ fn create_entities(world: &mut World) {
     world
         .create_entity()
         .with(Position { x: 50.0, y: 600.0 })
-        .with(Mobility::Omnidirectional { speed: 7.0 })
+        .with(Mobility::Omnidirectional { speed: 27.0 })
         .with(TargetEntity { entity: e1 })
         .with(Body {
             body_shape: BodyShape::Circle,
