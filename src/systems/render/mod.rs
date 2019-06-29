@@ -11,6 +11,11 @@ use anchor::Anchor;
 mod panel;
 use panel::Panel;
 
+mod text;
+use text::Text;
+
+const HOVERED: &str = "hovered";
+
 pub struct RenderSystem<'m> {
     pub gl: GlGraphics,
     pub gc: GlyphCache<'m>,
@@ -20,10 +25,12 @@ pub struct RenderSystem<'m> {
 impl<'m> RenderSystem<'m> {
     /// Initial screen width/height required for UI positioning.
     pub fn new(gl: GlGraphics, gc: GlyphCache<'m>, w: f64, h: f64) -> Self {
+        let mut hovered_panel = Panel::new(w, h, w / 2.0, 100.0).with_anchor(Anchor::BottomRight);
+        hovered_panel.add_elem(Text::new(HOVERED, "test text", 100.0));
         Self {
             gl,
             gc,
-            hovered_panel: Panel::new(w, h, w / 2.0, 100.0).with_anchor(Anchor::BottomRight),
+            hovered_panel,
         }
     }
 }
@@ -44,6 +51,15 @@ impl<'a, 'm> System<'a> for RenderSystem<'m> {
         &mut self,
         (viewport, map, offset, input, entity_tracker, body, position, target): Self::SystemData,
     ) {
+        // Update UI text.
+        // TODO: Probably cache whether or not this has changed in the entity
+        // tracker so that we don't churn as much.
+        self.hovered_panel.remove_elem(HOVERED);
+        if let Some(entity) = entity_tracker.hovered {
+            self.hovered_panel.add_elem(Text::new(HOVERED, format!("{:?}", entity).as_str(), 100.0));
+        }
+
+        // Prepare for rendering.
         let ref mut gc = self.gc;
         let ref panels = [&self.hovered_panel];
         self.gl.draw(*viewport, |c, g| {
@@ -60,21 +76,7 @@ impl<'a, 'm> System<'a> for RenderSystem<'m> {
                 draw_targeting_line(position, &target.position, transform, g);
             }
             for panel in panels {
-                panel.render(c.transform, g);
-            }
-            // TODO: Replace with rendering code for a real UI.
-            graphics::text(
-                color::hex("ffffff"),
-                20,
-                "test text",
-                gc,
-                c.transform.trans(100.0, 100.0),
-                g,
-            )
-            .unwrap();
-            // TODO: Actually render some UI thing for hovered entity.
-            if let Some(entity) = entity_tracker.hovered {
-                println!("Hovering over {:?}", entity);
+                panel.render(gc, c.transform, g);
             }
         })
     }
