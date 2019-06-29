@@ -32,20 +32,20 @@ impl Panel {
         }
     }
 
-    pub fn with_bg_color(mut self, color: Color) -> Self {
-        self.bg_color = color;
-        self
-    }
+    // pub fn with_bg_color(mut self, color: Color) -> Self {
+    //     self.bg_color = color;
+    //     self
+    // }
 
-    pub fn with_border_color(mut self, color: Color) -> Self {
-        self.border_color = color;
-        self
-    }
+    // pub fn with_border_color(mut self, color: Color) -> Self {
+    //     self.border_color = color;
+    //     self
+    // }
 
-    pub fn with_border_width(mut self, width: f64) -> Self {
-        self.border_width = width;
-        self
-    }
+    // pub fn with_border_width(mut self, width: f64) -> Self {
+    //     self.border_width = width;
+    //     self
+    // }
 
     pub fn with_anchor(mut self, anchor: Anchor) -> Self {
         self.anchor = anchor;

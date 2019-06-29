@@ -1,11 +1,10 @@
-use crate::components::Position;
 
 pub enum Anchor {
     TopLeft,
-    TopRight,
-    BottomLeft,
+    // TopRight,
+    // BottomLeft,
     BottomRight,
-    Center,
+    // Center,
 }
 
 impl Anchor {
@@ -13,10 +12,10 @@ impl Anchor {
         use Anchor::*;
         match self {
             TopLeft => (x, y),
-            TopRight => (x - w, y),
-            BottomLeft => (x, y - h),
+            // TopRight => (x - w, y),
+            // BottomLeft => (x, y - h),
             BottomRight => (x - w, y - h),
-            Center => (x - w / 2.0, y - h / 2.0),
+            // Center => (x - w / 2.0, y - h / 2.0),
         }
     }
 }
