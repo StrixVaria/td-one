@@ -2,7 +2,7 @@
 pub enum Anchor {
     TopLeft,
     // TopRight,
-    // BottomLeft,
+    BottomLeft,
     BottomRight,
     // Center,
 }
@@ -13,7 +13,7 @@ impl Anchor {
         match self {
             TopLeft => (x, y),
             // TopRight => (x - w, y),
-            // BottomLeft => (x, y - h),
+            BottomLeft => (x, y - h),
             BottomRight => (x - w, y - h),
             // Center => (x - w / 2.0, y - h / 2.0),
         }

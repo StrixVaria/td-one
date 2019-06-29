@@ -42,6 +42,8 @@ impl HasRegion for EntityRef {
 #[derive(Default)]
 pub struct EntityTracker {
     hovered: Option<Entity>,
+    selected: Option<Entity>,
+    selected_changed: bool,
 }
 
 fn main() {
