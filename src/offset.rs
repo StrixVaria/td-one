@@ -1,5 +1,5 @@
 const MIN_SCALE: f64 = 0.25;
-const MAX_SCALE: f64 = 2.50;
+const MAX_SCALE: f64 = 7.50;
 
 #[derive(Default)]
 pub struct WorldOffset {
