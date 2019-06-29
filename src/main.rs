@@ -4,7 +4,7 @@ use piston::{
     PressEvent, ReleaseEvent, RenderEvent, UpdateEvent, WindowSettings,
 };
 use sdl2_window::Sdl2Window;
-use specs::{Builder, DispatcherBuilder, World, Entity};
+use specs::{Builder, DispatcherBuilder, Entity, World};
 use viewport::Viewport;
 
 const WINDOW_DEFAULT_WIDTH: f64 = 1024.0;
@@ -25,7 +25,7 @@ mod input;
 use input::Input;
 
 mod qt;
-use qt::{QuadTree, RectangleData, Region, HasRegion};
+use qt::{HasRegion, QuadTree, RectangleData, Region};
 
 #[derive(Copy, Clone, Debug)]
 pub struct EntityRef {
@@ -71,7 +71,8 @@ fn main() {
     world.add_resource(Map::new(60, 60));
     world.add_resource(WorldOffset::new());
     world.add_resource(Input::default());
-    world.add_resource::<QuadTree<EntityRef>>(QuadTree::new(RectangleData::new(0.0, 0.0, 0.0, 0.0)));
+    world
+        .add_resource::<QuadTree<EntityRef>>(QuadTree::new(RectangleData::new(0.0, 0.0, 0.0, 0.0)));
     world.add_resource(EntityTracker::default());
 
     let mut update_dispatcher = DispatcherBuilder::new()
@@ -83,7 +84,12 @@ fn main() {
         .build();
     update_dispatcher.setup(&mut world.res);
     let mut render_dispatcher = DispatcherBuilder::new()
-        .with_thread_local(RenderSystem::new(gl, gc, WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT))
+        .with_thread_local(RenderSystem::new(
+            gl,
+            gc,
+            WINDOW_DEFAULT_WIDTH,
+            WINDOW_DEFAULT_HEIGHT,
+        ))
         .build();
     render_dispatcher.setup(&mut world.res);
 
@@ -166,7 +172,7 @@ fn create_entities(world: &mut World) {
         .build();
     world
         .create_entity()
-        .with(Position { x: 500.0, y: 500.0})
+        .with(Position { x: 500.0, y: 500.0 })
         .with(Body {
             body_shape: BodyShape::Square,
             size: 10.0,

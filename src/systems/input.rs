@@ -1,16 +1,21 @@
-use specs::{System, Write, ReadExpect};
+use specs::{ReadExpect, System, Write};
 
 use crate::{
     input::{Input, MousePressedState, MouseScrollDir},
     offset::WorldOffset,
-    EntityTracker, EntityRef,
     qt::{QuadTree, Region},
+    EntityRef, EntityTracker,
 };
 
 pub struct InputSystem;
 
 impl<'a> System<'a> for InputSystem {
-    type SystemData = (ReadExpect<'a, QuadTree<EntityRef>>, Write<'a, Input>, Write<'a, EntityTracker>, Write<'a, WorldOffset>);
+    type SystemData = (
+        ReadExpect<'a, QuadTree<EntityRef>>,
+        Write<'a, Input>,
+        Write<'a, EntityTracker>,
+        Write<'a, WorldOffset>,
+    );
 
     fn run(&mut self, (qt, mut input, mut entity_tracker, mut offset): Self::SystemData) {
         match &input.mouse_scroll_dir {

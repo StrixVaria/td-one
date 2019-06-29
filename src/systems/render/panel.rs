@@ -1,7 +1,7 @@
 use graphics::{math::Matrix2d, rectangle, types::Color};
 use opengl_graphics::GlGraphics;
 
-use crate::{systems::render::anchor::Anchor};
+use crate::systems::render::anchor::Anchor;
 
 const DEFAULT_BG_COLOR: Color = [0.0, 0.3, 0.3, 1.0];
 const DEFAULT_BORDER_COLOR: Color = [1.0; 4];
@@ -56,7 +56,10 @@ impl Panel {
         let (x, y) = self.anchor.absolute(self.x, self.y, self.w, self.h);
         rectangle(self.border_color, [x, y, self.w, self.h], transform, g);
         let (x, y) = (x + self.border_width, y + self.border_width);
-        let (w, h) = (self.w - 2.0 * self.border_width, self.h - 2.0 * self.border_width);
+        let (w, h) = (
+            self.w - 2.0 * self.border_width,
+            self.h - 2.0 * self.border_width,
+        );
         rectangle(self.bg_color, [x, y, w, h], transform, g);
     }
 }

@@ -1,14 +1,11 @@
-use specs::{System, ReadExpect, WriteStorage, Join};
+use specs::{Join, ReadExpect, System, WriteStorage};
 
-use crate::{map::Map, components::Position};
+use crate::{components::Position, map::Map};
 
 pub struct BoundaryConstraintSystem;
 
 impl<'a> System<'a> for BoundaryConstraintSystem {
-    type SystemData = (
-        ReadExpect<'a, Map>,
-        WriteStorage<'a, Position>,
-    );
+    type SystemData = (ReadExpect<'a, Map>, WriteStorage<'a, Position>);
 
     fn run(&mut self, (map, mut position): Self::SystemData) {
         let bounds = map.get_bounds();
@@ -17,4 +14,3 @@ impl<'a> System<'a> for BoundaryConstraintSystem {
         }
     }
 }
-

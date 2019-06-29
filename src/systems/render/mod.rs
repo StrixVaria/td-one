@@ -1,4 +1,4 @@
-use graphics::{clear, color, ellipse, rectangle, Transformed, math::Matrix2d, line};
+use graphics::{clear, color, ellipse, line, math::Matrix2d, rectangle, Transformed};
 use opengl_graphics::{GlGraphics, GlyphCache};
 use specs::{Join, Read, ReadExpect, ReadStorage, System};
 use viewport::Viewport;
@@ -40,7 +40,10 @@ impl<'a, 'm> System<'a> for RenderSystem<'m> {
         ReadStorage<'a, TargetLocation>,
     );
 
-    fn run(&mut self, (viewport, map, offset, input, entity_tracker, body, position, target): Self::SystemData) {
+    fn run(
+        &mut self,
+        (viewport, map, offset, input, entity_tracker, body, position, target): Self::SystemData,
+    ) {
         let ref mut gc = self.gc;
         let ref panels = [&self.hovered_panel];
         self.gl.draw(*viewport, |c, g| {
@@ -78,7 +81,9 @@ impl<'a, 'm> System<'a> for RenderSystem<'m> {
 }
 
 fn get_world_transform(global_transform: Matrix2d, offset: &WorldOffset) -> Matrix2d {
-    global_transform.trans(offset.h, offset.v).scale(offset.scale, offset.scale)
+    global_transform
+        .trans(offset.h, offset.v)
+        .scale(offset.scale, offset.scale)
 }
 
 fn draw_body(body: &Body, position: &Position, transform: Matrix2d, g: &mut GlGraphics) {

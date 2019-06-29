@@ -3,7 +3,7 @@ use graphics::types::Color;
 use graphics::*;
 use rand::Rng;
 
-use crate::{components::Position};
+use crate::components::Position;
 
 const GRID_TILE_SIZE: f64 = 12.0;
 
