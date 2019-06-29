@@ -83,7 +83,7 @@ fn main() {
         .build();
     update_dispatcher.setup(&mut world.res);
     let mut render_dispatcher = DispatcherBuilder::new()
-        .with_thread_local(RenderSystem { gl, gc })
+        .with_thread_local(RenderSystem::new(gl, gc, WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT))
         .build();
     render_dispatcher.setup(&mut world.res);
 
