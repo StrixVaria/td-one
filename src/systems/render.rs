@@ -41,7 +41,14 @@ impl<'a, 'm> System<'a> for RenderSystem<'m> {
                             g,
                         );
                     }
-                    // _ => (),
+                    BodyShape::Square => {
+                        rectangle(
+                            body.color,
+                            rectangle::centered_square(position.x, position.y, body.size),
+                            transform,
+                            g,
+                        );
+                    }
                 }
             }
             for (position, target) in (&position, &target).join() {

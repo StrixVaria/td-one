@@ -49,7 +49,7 @@ impl Component for TargetEntity {
 #[derive(Clone, Copy)]
 pub enum BodyShape {
     Circle,
-    // Square,
+    Square,
 }
 
 #[derive(Clone, Copy)]

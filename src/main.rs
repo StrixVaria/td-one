@@ -141,4 +141,13 @@ fn create_entities(world: &mut World) {
             color: [0.8, 0.8, 1.0, 1.0],
         })
         .build();
+    world
+        .create_entity()
+        .with(Position { x: 500.0, y: 500.0})
+        .with(Body {
+            body_shape: BodyShape::Square,
+            size: 10.0,
+            color: [0.5, 0.5, 0.5, 1.0],
+        })
+        .build();
 }
