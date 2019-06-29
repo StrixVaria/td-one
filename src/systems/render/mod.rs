@@ -1,4 +1,4 @@
-use graphics::{clear, color, ellipse, line, math::Matrix2d, rectangle, Transformed};
+use graphics::{clear, ellipse, line, math::Matrix2d, rectangle, Transformed, types::Color};
 use opengl_graphics::{GlGraphics, GlyphCache};
 use specs::{Join, Read, ReadExpect, ReadStorage, System};
 use viewport::Viewport;
@@ -13,6 +13,8 @@ use panel::Panel;
 
 mod text;
 use text::Text;
+
+const CLEAR_COLOR: Color = [0.0, 0.0, 0.0, 1.0];
 
 const HOVERED: &str = "hovered";
 
@@ -54,9 +56,9 @@ impl<'a, 'm> System<'a> for RenderSystem<'m> {
         // Update UI text.
         // TODO: Probably cache whether or not this has changed in the entity
         // tracker so that we don't churn as much.
-        self.hovered_panel.remove_elem(HOVERED);
         if let Some(entity) = entity_tracker.hovered {
-            self.hovered_panel.add_elem(Text::new(HOVERED, format!("{:?}", entity).as_str(), 100.0));
+            self.hovered_panel.remove_elem(HOVERED);
+            self.hovered_panel.add_elem(Text::new(HOVERED, format!("Hovered over:\n{:?}", entity).as_str(), 100.0));
         }
 
         // Prepare for rendering.
@@ -66,7 +68,7 @@ impl<'a, 'm> System<'a> for RenderSystem<'m> {
             let transform = get_world_transform(c.transform, &offset);
             let (mouse_x, mouse_y) = offset.to_local_pixel(input.mouse_x, input.mouse_y);
 
-            clear(color::hex("000000"), g);
+            clear(CLEAR_COLOR, g);
             map.render(transform, g, mouse_x, mouse_y);
 
             for (body, position) in (&body, &position).join() {
